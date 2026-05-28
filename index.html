@@ -1,0 +1,4108 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vilalara Pulse — Marketing Intelligence</title>
+<meta name="description" content="An editorial marketing intelligence dashboard for Vilalara Thalassa Resort." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Web fallbacks for non-Mac viewers. macOS users render real Optima Nova Light & Gill Sans Light from the system. -->
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Italianno&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/pt.js" defer></script>
+
+<style>
+/* ───────────────────────────────────────────────────────────────────────
+   Vilalara Pulse — Design System
+   Inspired by Monocle, Cereal, Aman.
+   "White space is luxury, not waste."
+   ─────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Vilalara brand palette ── */
+  --blanco:        #FCFBF8;
+  --hueso:         #E3DECF;
+  --tierra:        #453519;
+
+  /* Functional roles (light theme) */
+  --bg:            #FCFBF8;  /* Blanco */
+  --surface:       #F4EFE2;  /* Hueso, lifted */
+  --paper:         #FFFFFF;
+  --ink:           #2B2010;  /* Tierra deepened for body */
+  --ink-2:         #6E5A3D;  /* Tierra at ~60% */
+  --ink-3:         #A89978;  /* Tierra at ~35% */
+  --line:          #E3DECF;  /* Hueso as hairline */
+  --line-strong:   #C9C1AD;
+
+  /* Accent — Tierra as primary, derived complementary roles */
+  --tierra-deep:   #2B2010;
+  --tierra-soft:   #6E5A3D;
+  --moss:          #5C6B3D;   /* sage-olive — harmonises with tierra */
+  --terra:         #8E3B1F;   /* warm rust — for negative deltas */
+  --gold:          #A88643;
+  --sky:           #6F7A6A;
+
+  --pos:           #5C6B3D;
+  --neg:           #8E3B1F;
+
+  /* ── Typography ──
+     Display primary: Optima Nova Light. macOS ships Optima system-wide; we map 'Optima' weight 300.
+     Display secondary: Millionaire (signature script). Falls back to Italianno on the web.
+     Body: Gill Sans Light & Italic. macOS ships Gill Sans system-wide.
+  */
+  --display: 'Optima Nova LT Pro', 'Optima Nova', 'OptimaNova-Light',
+             'Optima', 'OptimaLTStd', 'URW Classico',
+             'Marcellus', 'Cormorant Garamond', Georgia, serif;
+  --display-script: 'Millionaire', 'Italianno', 'Pinyon Script',
+             'Snell Roundhand', cursive;
+  --body: 'Gill Sans Nova', 'GillSans Nova', 'Gill Sans',
+          'GillSans-Light', 'GillSansLT-Light',
+          'Seravek', 'Jost', 'Hind', -apple-system, sans-serif;
+
+  /* Legacy aliases kept for safety */
+  --serif: var(--display);
+  --sans: var(--body);
+
+  /* Spacing — golden-ish ratio */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+  --s-9: 6.5rem;
+
+  /* Geometry */
+  --radius: 2px;
+  --radius-lg: 4px;
+  --shadow-card: 0 1px 0 var(--line);
+  --shadow-float: 0 12px 40px -16px rgba(26,22,20,0.18), 0 2px 8px -4px rgba(26,22,20,0.08);
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 160ms;
+  --t-med: 320ms;
+  --t-slow: 560ms;
+}
+
+[data-theme="dark"] {
+  /* Dark editorial — Tierra-led, never pure black */
+  --bg:            #1C1408;   /* Tierra at deep base */
+  --surface:       #2A2113;
+  --paper:         #322716;
+  --ink:           #F4EEDB;   /* Hueso at high contrast */
+  --ink-2:         #C8BA9A;
+  --ink-3:         #8B7A55;
+  --line:          #3D3220;
+  --line-strong:   #4E412A;
+
+  --tierra-deep:   #F4EEDB;
+  --tierra-soft:   #C8BA9A;
+  --moss:          #A3B485;
+  --terra:         #D7896A;
+  --gold:          #D9B873;
+  --sky:           #A2B0A0;
+
+  --pos:           #A3B485;
+  --neg:           #D7896A;
+
+  --shadow-card: 0 1px 0 var(--line);
+  --shadow-float: 0 16px 48px -16px rgba(0,0,0,0.65), 0 2px 12px -4px rgba(0,0,0,0.4);
+}
+
+/* Reset & base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01' 1, 'cv11' 1;
+  line-height: 1.5;
+  transition: background-color var(--t-med) var(--ease), color var(--t-med) var(--ease);
+}
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; padding: 0; }
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--tierra); color: var(--blanco); }
+[data-theme="dark"] ::selection { background: var(--gold); color: var(--bg); }
+
+/* Editorial typography utilities ───────────────────────────────── */
+.serif { font-family: var(--display); font-optical-sizing: auto; }
+.eyebrow {
+  font-family: var(--body);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.tabular { font-variant-numeric: tabular-nums; }
+.smallcaps {
+  font-variant: all-small-caps;
+  letter-spacing: 0.08em;
+}
+.dek {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink-2);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+/* Layout shell ─────────────────────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+/* Sidebar ──────────────────────────────────────────────────────── */
+.sidebar {
+  border-right: 1px solid var(--line);
+  padding: var(--s-6) var(--s-5);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  transition: background-color var(--t-med) var(--ease);
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: var(--s-8);
+  cursor: default;
+}
+.wordmark .mark-line {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.005em;
+  line-height: 1.04;
+  color: var(--ink);
+}
+.wordmark .mark-line.it {
+  font-family: var(--display-script);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 2.875rem;
+  letter-spacing: 0;
+  line-height: 0.9;
+  color: var(--tierra-soft);
+  margin-top: -2px;
+  margin-left: 4px;
+}
+.wordmark .mark-sub {
+  margin-top: 14px;
+  font-size: 0.625rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-family: var(--body);
+  font-weight: 400;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-section {
+  padding: var(--s-2) 0;
+}
+.nav-section-title {
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: var(--s-3) 0 var(--s-2);
+  font-weight: 500;
+}
+.nav-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--s-2) 0;
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+  border: none;
+  text-align: left;
+  width: 100%;
+  position: relative;
+  transition: color var(--t-fast) var(--ease);
+}
+.nav-item:hover { color: var(--ink); }
+.nav-item.is-active { color: var(--ink); }
+.nav-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--tierra);
+}
+[data-theme="dark"] .nav-item.is-active::before { background: var(--gold); }
+.nav-item .num {
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.sidebar-foot button {
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  transition: color var(--t-fast) var(--ease);
+}
+.sidebar-foot button:hover { color: var(--ink); }
+.sidebar-foot .sep { color: var(--line-strong); }
+
+/* Main ────────────────────────────────────────────────────────── */
+.main {
+  min-width: 0;
+  padding: 0;
+}
+.masthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-6);
+  padding: var(--s-6) var(--s-7) var(--s-5);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: rgba(252,251,248,0.92);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  z-index: 20;
+}
+[data-theme="dark"] .masthead { background: rgba(28,20,8,0.88); }
+
+.masthead-titles { display: flex; flex-direction: column; gap: 4px; }
+.masthead-eyebrow {
+  font-size: 0.625rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.masthead-date {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.masthead-date em { font-style: italic; color: var(--ink-2); font-weight: 300; }
+
+.masthead-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+}
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+}
+.tool-btn {
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: all var(--t-fast) var(--ease);
+}
+.tool-btn:hover { color: var(--ink); }
+.tool-btn.is-active {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.tool-pill {
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: all var(--t-fast) var(--ease);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.tool-pill:hover { border-color: var(--line-strong); color: var(--ink); }
+.tool-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--tierra);
+  display: inline-block;
+}
+[data-theme="dark"] .tool-pill .dot { background: var(--gold); }
+
+/* Section/page container ──────────────────────────────────────── */
+.view { padding: var(--s-7) var(--s-7) var(--s-9); max-width: 1480px; }
+.view[hidden] { display: none; }
+
+.section { margin-bottom: var(--s-9); }
+.section-head {
+  margin-bottom: var(--s-6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-5);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: var(--s-4);
+}
+.section-titles { max-width: 720px; }
+.section-titles h2 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 2.25rem;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 6px 0 var(--s-3);
+  color: var(--ink);
+}
+.section-titles h2 em { font-style: italic; font-weight: 300; color: var(--ink-2); }
+.section-titles .dek { max-width: 56ch; }
+
+.section-meta {
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Today's Story — the editorial lead ───────────────────────────── */
+.story {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--s-7) var(--s-7) var(--s-6);
+  margin-bottom: var(--s-7);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: background-color var(--t-med) var(--ease), border-color var(--t-med) var(--ease);
+}
+.story::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--tierra) 0%, var(--hueso) 50%, var(--tierra) 100%);
+  opacity: 0.55;
+}
+[data-theme="dark"] .story::before {
+  background: linear-gradient(90deg, var(--gold) 0%, var(--hueso) 50%, var(--gold) 100%);
+  opacity: 0.45;
+}
+.story-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.story-eyebrow .badge {
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tierra);
+  display: flex; align-items: center; gap: 6px;
+}
+[data-theme="dark"] .story-eyebrow .badge { color: var(--gold); }
+.story-eyebrow .badge .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--tierra);
+  display: inline-block;
+  animation: breathe 2.4s var(--ease) infinite;
+}
+[data-theme="dark"] .story-eyebrow .badge .dot { background: var(--gold); }
+@keyframes breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.18); }
+}
+.story-eyebrow .sep { color: var(--line-strong); }
+.story-eyebrow .meta {
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.story-headline {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 1.75rem;
+  letter-spacing: -0.015em;
+  line-height: 1.18;
+  margin: 0 0 var(--s-5);
+  color: var(--ink);
+  max-width: 38ch;
+}
+.story-headline em { font-style: italic; font-weight: 300; color: var(--ink-2); }
+
+.story-body {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 62ch;
+  margin: 0;
+}
+.story-body strong {
+  font-weight: 500;
+  color: var(--ink);
+  font-style: normal;
+}
+.story-body .pos { color: var(--moss); font-weight: 500; }
+.story-body .neg { color: var(--terra); font-weight: 500; }
+
+.story-foot {
+  margin-top: var(--s-5);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+}
+.story-tag {
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex; align-items: center; gap: 8px;
+}
+.story-tag .v { color: var(--ink-2); letter-spacing: 0.04em; text-transform: none; font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
+.story-tag .v.pos { color: var(--moss); }
+.story-tag .v.neg { color: var(--terra); }
+
+/* KPI grid ─────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--s-7);
+}
+.kpi {
+  background: var(--paper);
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), transform var(--t-med) var(--ease-out);
+  min-height: 178px;
+}
+.kpi:hover { background: var(--surface); }
+.kpi:hover .kpi-spark { opacity: 1; }
+.kpi:hover .kpi-extra { opacity: 1; transform: translateY(0); }
+
+.kpi-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kpi-eyebrow .arrow {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all var(--t-fast) var(--ease);
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ink-3);
+}
+.kpi:hover .kpi-eyebrow .arrow { opacity: 1; transform: translateX(0); }
+
+.kpi-value {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 3rem;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--s-1);
+}
+.kpi-value .unit {
+  font-size: 1.125rem;
+  color: var(--ink-2);
+  font-weight: 300;
+  margin-left: 4px;
+  letter-spacing: 0;
+}
+
+.kpi-deltas {
+  display: flex;
+  gap: var(--s-5);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  align-items: baseline;
+}
+.kpi-delta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.kpi-delta .label {
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.kpi-delta .value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+}
+.kpi-delta .value.pos { color: var(--moss); }
+.kpi-delta .value.neg { color: var(--terra); }
+.kpi-delta .value.flat { color: var(--ink-3); }
+
+.kpi-spark {
+  position: absolute;
+  right: var(--s-4);
+  top: var(--s-4);
+  width: 88px;
+  height: 28px;
+  opacity: 0.5;
+  transition: opacity var(--t-med) var(--ease);
+  pointer-events: none;
+}
+
+.kpi-extra {
+  position: absolute;
+  left: var(--s-5);
+  right: var(--s-5);
+  bottom: var(--s-3);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease);
+  font-style: italic;
+  font-family: var(--display);
+  font-weight: 300;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+/* Two-up chart row ─────────────────────────────────────────────── */
+.row-2 {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--s-5);
+  margin-bottom: var(--s-7);
+}
+@media (max-width: 1100px) {
+  .row-2 { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  transition: background-color var(--t-med) var(--ease);
+}
+.panel-head {
+  margin-bottom: var(--s-4);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--line);
+}
+.panel-head .eyebrow { margin-bottom: 4px; }
+.panel-head h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.25rem;
+  letter-spacing: -0.005em;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+.panel-head h3 em { font-style: italic; font-weight: 300; color: var(--ink-2); }
+.panel-head .insight {
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  margin-top: 6px;
+  font-style: italic;
+  font-family: var(--display);
+  font-weight: 300;
+  line-height: 1.45;
+}
+.panel-head .insight strong {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--ink);
+}
+.panel-head .insight .pos { color: var(--moss); font-weight: 500; font-style: normal; }
+.panel-head .insight .neg { color: var(--terra); font-weight: 500; font-style: normal; }
+.panel-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* Segment list (panel) ─────────────────────────────────────────── */
+.seg-list { display: flex; flex-direction: column; gap: var(--s-4); }
+.seg-row { display: grid; grid-template-columns: 1.4fr 2fr auto; gap: var(--s-4); align-items: center; }
+.seg-name {
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+.seg-name .sub {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.seg-bar {
+  position: relative;
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.seg-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--moss);
+  border-radius: 2px;
+  transition: width var(--t-slow) var(--ease-out);
+}
+.seg-row:nth-child(2) .seg-bar-fill { background: var(--gold); }
+.seg-row:nth-child(3) .seg-bar-fill { background: var(--terra); }
+.seg-row:nth-child(4) .seg-bar-fill { background: var(--sky); }
+.seg-row:nth-child(5) .seg-bar-fill { background: var(--ink-3); }
+.seg-row:nth-child(6) .seg-bar-fill { background: var(--ink-3); opacity: 0.55; }
+
+.seg-val {
+  font-size: 0.9375rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-align: right;
+  min-width: 80px;
+}
+.seg-val .pct {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-top: 1px;
+}
+
+/* Drill-down panel ─────────────────────────────────────────────── */
+.drill-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,22,20,0.42);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-med) var(--ease);
+  z-index: 90;
+}
+.drill-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+.drill {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(640px, 92vw);
+  background: var(--bg);
+  border-left: 1px solid var(--line);
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform var(--t-med) var(--ease-out);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-float);
+}
+.drill.is-open { transform: translateX(0); }
+
+.drill-head {
+  padding: var(--s-6) var(--s-6) var(--s-4);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.drill-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.drill-title {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 1.875rem;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  margin: 0;
+}
+.drill-title em { font-style: italic; font-weight: 300; color: var(--ink-2); }
+.drill-close {
+  width: 36px; height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+  transition: all var(--t-fast) var(--ease);
+  flex-shrink: 0;
+}
+.drill-close:hover { color: var(--ink); border-color: var(--ink-2); }
+
+.drill-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s-5) var(--s-6) var(--s-7);
+}
+.drill-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-4);
+  margin-bottom: var(--s-6);
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+.drill-stat .label {
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+.drill-stat .value {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.drill-stat .sub {
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.drill-section { margin-bottom: var(--s-6); }
+.drill-section-title {
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: var(--s-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.drill-chart-wrap {
+  height: 220px;
+  position: relative;
+}
+.drill-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.drill-action {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--tierra);
+  padding: var(--s-4);
+  border-radius: var(--radius);
+  font-family: var(--display);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ink-2);
+  line-height: 1.5;
+  font-size: 0.9375rem;
+}
+[data-theme="dark"] .drill-action { border-left-color: var(--gold); }
+.drill-action strong { color: var(--ink); font-style: normal; font-weight: 500; }
+
+/* Campaign list ────────────────────────────────────────────────── */
+.campaign-list { display: flex; flex-direction: column; gap: var(--s-3); }
+.campaign-row {
+  display: grid;
+  grid-template-columns: 2.2fr 1.4fr 1fr 1fr 1fr;
+  gap: var(--s-4);
+  align-items: center;
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.campaign-row:last-child { border-bottom: none; }
+.campaign-row.header {
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.campaign-name {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.campaign-name .n {
+  font-family: var(--display);
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.campaign-name .meta {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.campaign-platform {
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+.campaign-platform .audience {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.campaign-budget, .campaign-conv, .campaign-rev {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9375rem;
+  color: var(--ink);
+}
+.campaign-budget .sub, .campaign-conv .sub, .campaign-rev .sub {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+  font-weight: 400;
+}
+.campaign-progress {
+  height: 2px;
+  background: var(--line);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.campaign-progress-fill {
+  height: 100%;
+  background: var(--tierra);
+  border-radius: 1px;
+}
+[data-theme="dark"] .campaign-progress-fill { background: var(--gold); }
+
+/* Pace horizon cards ───────────────────────────────────────────── */
+.pace-horizons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--s-7);
+}
+.pace-h {
+  background: var(--paper);
+  padding: var(--s-5) var(--s-4) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.pace-h .head {
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.pace-h .v {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 1.875rem;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  line-height: 1;
+}
+.pace-h .v .unit { font-size: 0.875rem; color: var(--ink-2); margin-left: 3px; }
+.pace-h .d {
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.pace-h .d.pos { color: var(--moss); }
+.pace-h .d.neg { color: var(--terra); }
+.pace-h .d.flat { color: var(--ink-3); }
+
+@media (max-width: 1100px) {
+  .pace-horizons { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Day strip (week view) ────────────────────────────────────────── */
+.day-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.day-cell {
+  background: var(--paper);
+  padding: var(--s-4) var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 110px;
+}
+.day-cell .dow {
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.day-cell .date {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.day-cell .occ {
+  margin-top: auto;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.day-cell.best { background: var(--surface); }
+.day-cell.best .occ { color: var(--moss); font-weight: 500; }
+.day-cell.worst .occ { color: var(--terra); font-weight: 500; }
+
+/* Sources / dropzone ──────────────────────────────────────────── */
+.sources-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-5);
+  margin-bottom: var(--s-7);
+}
+@media (max-width: 1100px) { .sources-grid { grid-template-columns: 1fr; } }
+
+.dropzone {
+  background: var(--paper);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--s-6) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease);
+  position: relative;
+}
+.dropzone:hover, .dropzone.is-dragging {
+  background: var(--surface);
+  border-color: var(--tierra);
+}
+[data-theme="dark"] .dropzone:hover,
+[data-theme="dark"] .dropzone.is-dragging { border-color: var(--gold); }
+.dropzone .eyebrow { display: block; margin-bottom: var(--s-1); }
+.dropzone h4 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 1.25rem;
+  letter-spacing: -0.005em;
+  margin: 0;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.dropzone h4 em { font-style: italic; color: var(--ink-2); font-weight: 300; }
+.dropzone p {
+  font-family: var(--display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  margin: 0;
+  line-height: 1.45;
+}
+.dropzone-state {
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--line);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.dropzone-state.ok { color: var(--moss); }
+.dropzone-state .file-info { font-variant-numeric: tabular-nums; }
+.dropzone-state button {
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 4px 0;
+}
+.dropzone-state button:hover { color: var(--terra); }
+
+.sources-toolbar {
+  display: flex;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  padding: var(--s-5);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+.sources-action {
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: all var(--t-fast) var(--ease);
+}
+.sources-action:hover {
+  border-color: var(--ink-2);
+  color: var(--ink);
+}
+.sources-action.primary {
+  background: var(--tierra);
+  color: var(--blanco);
+  border-color: var(--tierra);
+}
+.sources-action.primary:hover { background: var(--tierra-deep); border-color: var(--tierra-deep); }
+[data-theme="dark"] .sources-action.primary {
+  background: var(--gold);
+  color: var(--bg);
+  border-color: var(--gold);
+}
+
+/* Month progress bar ──────────────────────────────────────────── */
+.month-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--s-7);
+}
+.month-progress-bar {
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.month-progress-actual,
+.month-progress-budget {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  border-radius: 3px;
+}
+.month-progress-budget { background: var(--ink-3); opacity: 0.4; }
+.month-progress-actual { background: var(--tierra); }
+[data-theme="dark"] .month-progress-actual { background: var(--gold); }
+.month-progress-labels {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--s-4);
+  font-size: 0.75rem;
+}
+.month-progress-labels .lbl {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.month-progress-labels .key {
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.month-progress-labels .val {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 1.125rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.month-progress-labels .sub {
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.month-progress-labels .sub.pos { color: var(--moss); }
+.month-progress-labels .sub.neg { color: var(--terra); }
+
+/* Coming Soon (other views) ────────────────────────────────────── */
+.coming {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--s-9) var(--s-7);
+  text-align: center;
+}
+.coming .eyebrow { margin-bottom: var(--s-4); display: block; }
+.coming h3 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 2rem;
+  letter-spacing: -0.015em;
+  margin: 0 auto var(--s-3);
+  max-width: 22ch;
+  line-height: 1.15;
+}
+.coming h3 em { font-style: italic; color: var(--ink-2); font-weight: 300; }
+.coming p {
+  font-family: var(--display);
+  font-weight: 300;
+  color: var(--ink-2);
+  font-size: 1.0625rem;
+  max-width: 52ch;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+.coming-phase {
+  display: inline-block;
+  margin-top: var(--s-5);
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* Loading skeleton ─────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface), var(--line) 50%, var(--surface));
+  background-size: 800px 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: var(--radius);
+}
+
+/* Entrance animations ──────────────────────────────────────────── */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: riseIn var(--t-slow) var(--ease-out) both; }
+.rise.d1 { animation-delay: 60ms; }
+.rise.d2 { animation-delay: 120ms; }
+.rise.d3 { animation-delay: 200ms; }
+.rise.d4 { animation-delay: 280ms; }
+.rise.d5 { animation-delay: 360ms; }
+
+/* Scrollbar — subtle ──────────────────────────────────────────── */
+.drill-body::-webkit-scrollbar { width: 6px; }
+.drill-body::-webkit-scrollbar-track { background: transparent; }
+.drill-body::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+
+/* Focus rings ──────────────────────────────────────────────────── */
+button:focus-visible, .kpi:focus-visible {
+  outline: 2px solid var(--tierra);
+  outline-offset: 2px;
+}
+[data-theme="dark"] button:focus-visible,
+[data-theme="dark"] .kpi:focus-visible { outline-color: var(--gold); }
+
+/* Responsive minimal ──────────────────────────────────────────── */
+@media (max-width: 880px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .view { padding: var(--s-5) var(--s-5) var(--s-8); }
+  .masthead { padding: var(--s-5) var(--s-5) var(--s-4); }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .drill-stat-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body data-theme="light" data-lang="pt">
+
+<div class="app">
+
+  <!-- ───────────────── Sidebar ───────────────── -->
+  <aside class="sidebar">
+    <div class="wordmark">
+      <div class="mark-line">Vilalara</div>
+      <div class="mark-line it">Pulse</div>
+      <div class="mark-sub" data-i18n="masthead.sub">Marketing Intelligence</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.daily">Diário</div>
+        <button class="nav-item is-active" data-view="today">
+          <span data-i18n="nav.today">Hoje</span>
+          <span class="num">01</span>
+        </button>
+        <button class="nav-item" data-view="week">
+          <span data-i18n="nav.week">A Semana</span>
+          <span class="num">02</span>
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.strategy">Estratégia</div>
+        <button class="nav-item" data-view="month">
+          <span data-i18n="nav.month">O Mês</span>
+          <span class="num">03</span>
+        </button>
+        <button class="nav-item" data-view="origins">
+          <span data-i18n="nav.origins">Origens</span>
+          <span class="num">04</span>
+        </button>
+        <button class="nav-item" data-view="digital">
+          <span data-i18n="nav.digital">Digital</span>
+          <span class="num">05</span>
+        </button>
+        <button class="nav-item" data-view="pace">
+          <span data-i18n="nav.pace">Pace &amp; Forecast</span>
+          <span class="num">06</span>
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.backstage">Backstage</div>
+        <button class="nav-item" data-view="archive">
+          <span data-i18n="nav.archive">Arquivo</span>
+          <span class="num">07</span>
+        </button>
+        <button class="nav-item" data-view="sources">
+          <span data-i18n="nav.sources">Fontes</span>
+          <span class="num">08</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button id="toggle-lang" title="Toggle language"><span id="lang-label">EN</span></button>
+      <span class="sep">·</span>
+      <button id="toggle-theme" title="Toggle theme"><span id="theme-label">Dark</span></button>
+    </div>
+  </aside>
+
+  <!-- ───────────────── Main ───────────────── -->
+  <main class="main">
+
+    <header class="masthead">
+      <div class="masthead-titles">
+        <div class="masthead-eyebrow" data-i18n="masthead.issue">Volume I · Issue No. 01</div>
+        <div class="masthead-date" id="masthead-date">—</div>
+      </div>
+      <div class="masthead-tools">
+        <div class="tool-group" id="range-group">
+          <button class="tool-btn is-active" data-range="today" data-i18n="range.today">Hoje</button>
+          <button class="tool-btn" data-range="7d" data-i18n="range.week">Semana</button>
+          <button class="tool-btn" data-range="mtd" data-i18n="range.mtd">MTD</button>
+          <button class="tool-btn" data-range="ytd" data-i18n="range.ytd">YTD</button>
+        </div>
+        <button class="tool-pill" id="yoy-toggle">
+          <span class="dot"></span>
+          <span data-i18n="masthead.yoy">vs. 2025</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ───────────────── Today view ───────────────── -->
+    <section class="view" data-view="today">
+
+      <!-- Today's Story -->
+      <article class="story rise d1" id="story">
+        <div class="story-eyebrow">
+          <span class="badge"><span class="dot"></span><span data-i18n="story.live">Em tempo real</span></span>
+          <span class="sep">·</span>
+          <span class="meta" id="story-meta">—</span>
+        </div>
+        <h1 class="story-headline" id="story-headline">—</h1>
+        <p class="story-body" id="story-body">—</p>
+        <div class="story-foot" id="story-foot"></div>
+      </article>
+
+      <!-- Hero KPI grid -->
+      <section class="section">
+        <div class="section-head rise d2">
+          <div class="section-titles">
+            <div class="eyebrow" data-i18n="kpi.eyebrow">Capítulo I</div>
+            <h2 data-i18n="kpi.title">Performance, <em>em síntese</em></h2>
+            <p class="dek" data-i18n="kpi.dek">Os seis números que importam hoje, comparados com o ano passado e com o esperado.</p>
+          </div>
+          <div class="section-meta" id="kpi-meta">—</div>
+        </div>
+        <div class="kpi-grid" id="kpi-grid"></div>
+      </section>
+
+      <!-- Two-up: revenue trend + segment mix -->
+      <section class="section row-2">
+        <div class="panel rise d3" id="panel-revenue">
+          <div class="panel-head">
+            <div class="eyebrow" data-i18n="rev.eyebrow">Capítulo II</div>
+            <h3 data-i18n="rev.title">A trajetória da <em>receita</em></h3>
+            <p class="insight" id="rev-insight">—</p>
+          </div>
+          <div class="panel-body">
+            <canvas id="chart-revenue"></canvas>
+          </div>
+        </div>
+
+        <div class="panel rise d4" id="panel-segments">
+          <div class="panel-head">
+            <div class="eyebrow" data-i18n="seg.eyebrow">Capítulo III</div>
+            <h3 data-i18n="seg.title">De onde vêm os <em>hóspedes</em></h3>
+            <p class="insight" id="seg-insight">—</p>
+          </div>
+          <div class="panel-body">
+            <div class="seg-list" id="seg-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Two-up: pickup pace + markets -->
+      <section class="section row-2">
+        <div class="panel rise d4" id="panel-pickup">
+          <div class="panel-head">
+            <div class="eyebrow" data-i18n="pace.eyebrow">Capítulo IV</div>
+            <h3 data-i18n="pace.title">Pickup vs. <em>forecast</em></h3>
+            <p class="insight" id="pickup-insight">—</p>
+          </div>
+          <div class="panel-body">
+            <canvas id="chart-pickup"></canvas>
+          </div>
+        </div>
+
+        <div class="panel rise d5" id="panel-markets">
+          <div class="panel-head">
+            <div class="eyebrow" data-i18n="mkt.eyebrow">Capítulo V</div>
+            <h3 data-i18n="mkt.title">Os <em>mercados</em> em movimento</h3>
+            <p class="insight" id="mkt-insight">—</p>
+          </div>
+          <div class="panel-body">
+            <div class="seg-list" id="mkt-list"></div>
+          </div>
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ───────────────── Placeholder views ───────────────── -->
+    <section class="view" data-view="week" hidden>
+      <div id="view-week-content"></div>
+    </section>
+
+    <section class="view" data-view="month" hidden>
+      <div id="view-month-content"></div>
+    </section>
+
+    <section class="view" data-view="origins" hidden>
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">04</div>
+          <h2 data-i18n="origins.title">De onde <em>vêm os hóspedes</em></h2>
+          <p class="dek" data-i18n="origins.dek">Canais, mercados e nacionalidades num único mapa narrativo.</p>
+        </div>
+      </div>
+      <div class="coming">
+        <span class="eyebrow" data-i18n="coming.eyebrow">Próximo capítulo</span>
+        <h3 data-i18n="origins.coming">Mapa de origens <em>em desenvolvimento</em></h3>
+        <p data-i18n="origins.copy">Direct vs OTAs vs TOs, top 10 nacionalidades, lead time e LOS por mercado, custo de aquisição por canal. Inclui mapa-mundo interativo.</p>
+        <span class="coming-phase">Fase II</span>
+      </div>
+    </section>
+
+    <section class="view" data-view="digital" hidden>
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">05</div>
+          <h2 data-i18n="digital.title">O <em>pulso digital</em></h2>
+          <p class="dek" data-i18n="digital.dek">GA4, paid media e o funil completo desde o anúncio até à reserva.</p>
+        </div>
+      </div>
+      <div class="coming">
+        <span class="eyebrow" data-i18n="coming.eyebrow">Próximo capítulo</span>
+        <h3 data-i18n="digital.coming">Digital Pulse <em>chega na Fase III</em></h3>
+        <p data-i18n="digital.copy">Integração GA4, Google Ads, Meta Ads. Funnel chart editorial, top campanhas, comparações YoY em todos os indicadores.</p>
+        <span class="coming-phase">Fase III</span>
+      </div>
+    </section>
+
+    <section class="view" data-view="pace" hidden>
+      <div id="view-pace-content"></div>
+    </section>
+
+    <section class="view" data-view="archive" hidden>
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">07</div>
+          <h2 data-i18n="archive.title">O <em>arquivo</em></h2>
+          <p class="dek" data-i18n="archive.dek">Snapshots semanais guardados, evolução histórica, anotações em timeline.</p>
+        </div>
+      </div>
+      <div class="coming">
+        <span class="eyebrow" data-i18n="coming.eyebrow">Próximo capítulo</span>
+        <h3 data-i18n="archive.coming">Arquivo histórico <em>na Fase IV</em></h3>
+        <p data-i18n="archive.copy">Snapshots semanais automáticos, comparações longitudinais, anotações ancoradas em datas específicas que aparecem em hover.</p>
+        <span class="coming-phase">Fase IV</span>
+      </div>
+    </section>
+
+    <section class="view" data-view="sources" hidden>
+      <div id="view-sources-content"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ───────────────── Drill-down panel ───────────────── -->
+<div class="drill-overlay" id="drill-overlay"></div>
+<aside class="drill" id="drill">
+  <div class="drill-head">
+    <div>
+      <div class="drill-eyebrow" id="drill-eyebrow">—</div>
+      <h2 class="drill-title" id="drill-title">—</h2>
+    </div>
+    <button class="drill-close" id="drill-close" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M1 1 L13 13 M13 1 L1 13"/>
+      </svg>
+    </button>
+  </div>
+  <div class="drill-body" id="drill-body"></div>
+</aside>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   VILALARA PULSE — application
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ───────── 1. CONFIG ───────── */
+const CFG = {
+  storageKey: 'vilalara_pulse_state_v1',
+  todayISO: '2026-05-25', // fixed seed so demo is deterministic; in real life: dayjs().format('YYYY-MM-DD')
+  rooms: 124,
+  resort: 'Vilalara Thalassa Resort',
+};
+
+const MARKETS = [
+  { code: 'DE', label: { pt: 'Alemanha',     en: 'Germany'     }, share: 0.235 },
+  { code: 'UK', label: { pt: 'Reino Unido',  en: 'United Kingdom' }, share: 0.205 },
+  { code: 'PT', label: { pt: 'Portugal',     en: 'Portugal'    }, share: 0.135 },
+  { code: 'NL', label: { pt: 'Países Baixos',en: 'Netherlands' }, share: 0.115 },
+  { code: 'FR', label: { pt: 'França',       en: 'France'      }, share: 0.090 },
+  { code: 'IE', label: { pt: 'Irlanda',      en: 'Ireland'     }, share: 0.070 },
+  { code: 'BE', label: { pt: 'Bélgica',      en: 'Belgium'     }, share: 0.050 },
+  { code: 'CH', label: { pt: 'Suíça',        en: 'Switzerland' }, share: 0.040 },
+  { code: 'ES', label: { pt: 'Espanha',      en: 'Spain'       }, share: 0.030 },
+  { code: 'US', label: { pt: 'EUA',          en: 'USA'         }, share: 0.030 },
+];
+
+const CHANNELS = [
+  { code: 'direct',   label: { pt: 'Direto',         en: 'Direct'     }, sub: { pt: 'Web + Reservas', en: 'Web + Reservations' }, share: 0.32, cost: 0.04 },
+  { code: 'booking',  label: { pt: 'Booking.com',    en: 'Booking.com'}, sub: { pt: 'Plataforma online', en: 'Online platform'  }, share: 0.26, cost: 0.18 },
+  { code: 'expedia',  label: { pt: 'Expedia',        en: 'Expedia'    }, sub: { pt: 'Plataforma online', en: 'Online platform'  }, share: 0.11, cost: 0.20 },
+  { code: 'to',       label: { pt: 'Operadores',     en: 'Tour Operators'}, sub: { pt: 'TUI, DerTour, Jet2',en: 'TUI, DerTour, Jet2' }, share: 0.17, cost: 0.22 },
+  { code: 'corp',     label: { pt: 'Corporate',      en: 'Corporate'  }, sub: { pt: 'B2B contratado',  en: 'Contracted B2B'    }, share: 0.08, cost: 0.10 },
+  { code: 'other',    label: { pt: 'Outros',         en: 'Other'      }, sub: { pt: 'Grossistas, GDS', en: 'Wholesalers, GDS'   }, share: 0.06, cost: 0.15 },
+];
+
+// Synthetic active campaigns for The Week view. Replaced by real data later via Sources panel.
+const CAMPAIGNS = [
+  {
+    id: 'c1',
+    name: { pt: 'Wellness Week, Maio',      en: 'Wellness Week, May' },
+    platform: 'Meta Ads',
+    audience: { pt: 'DE, UK, NL', en: 'DE, UK, NL' },
+    start: '2026-05-12', end: '2026-05-31',
+    budget: 4500, spend: 2840, sessions: 4250, conversions: 18, revenue: 38420,
+  },
+  {
+    id: 'c2',
+    name: { pt: 'Tarifa Direta Primavera',  en: 'Direct Spring Offer' },
+    platform: 'Google Ads',
+    audience: { pt: 'PT, ES, FR',           en: 'PT, ES, FR' },
+    start: '2026-05-01', end: '2026-06-15',
+    budget: 6200, spend: 3120, sessions: 6810, conversions: 24, revenue: 51200,
+  },
+  {
+    id: 'c3',
+    name: { pt: 'Newsletter, Mercado UK',   en: 'UK Newsletter Push' },
+    platform: 'Email',
+    audience: { pt: 'Base UK, 8.400 contactos', en: 'UK base, 8,400 contacts' },
+    start: '2026-05-22', end: '2026-05-28',
+    budget: 800, spend: 0, sessions: 1240, conversions: 9, revenue: 22150,
+  },
+  {
+    id: 'c4',
+    name: { pt: 'Co-op TUI, Verão 2026',    en: 'TUI Co-op, Summer 2026' },
+    platform: 'Parceiro',
+    audience: { pt: 'Catálogo TUI Alemanha', en: 'TUI Germany catalogue' },
+    start: '2026-04-15', end: '2026-07-31',
+    budget: 12000, spend: 5400, sessions: null, conversions: 41, revenue: 96400,
+  },
+  {
+    id: 'c5',
+    name: { pt: 'Hóspedes Recorrentes',     en: 'Returning Guests' },
+    platform: 'Email',
+    audience: { pt: 'Base global, 14.200 contactos', en: 'Global base, 14,200 contacts' },
+    start: '2026-05-18', end: '2026-06-30',
+    budget: 1200, spend: 280, sessions: 890, conversions: 7, revenue: 19880,
+  },
+];
+
+/* ───────── 2. I18N ───────── */
+const I18N = {
+  pt: {
+    'masthead.sub': 'Marketing Intelligence',
+    'masthead.issue': 'Volume I · Edição N.º 01',
+    'masthead.yoy': 'vs. 2025',
+    'nav.daily': 'Diário',
+    'nav.strategy': 'Estratégia',
+    'nav.backstage': 'Backstage',
+    'nav.today': 'Hoje',
+    'nav.week': 'A Semana',
+    'nav.month': 'O Mês',
+    'nav.origins': 'Origens',
+    'nav.digital': 'Digital',
+    'nav.pace': 'Pace & Forecast',
+    'nav.archive': 'Arquivo',
+    'nav.sources': 'Fontes',
+    'range.today': 'Hoje',
+    'range.week': 'Semana',
+    'range.mtd': 'Mês',
+    'range.ytd': 'Ano',
+    'story.live': 'Em tempo real',
+    'kpi.eyebrow': 'Capítulo I',
+    'kpi.title.a': 'Performance, ',
+    'kpi.title.b': 'em síntese',
+    'kpi.dek': 'Os seis números que importam hoje, comparados com o ano passado e com o esperado.',
+    'rev.eyebrow': 'Capítulo II',
+    'rev.title.a': 'A trajetória da ',
+    'rev.title.b': 'receita',
+    'seg.eyebrow': 'Capítulo III',
+    'seg.title.a': 'De onde vêm os ',
+    'seg.title.b': 'hóspedes',
+    'pace.eyebrow': 'Capítulo IV',
+    'pace.title.a': 'Pickup vs. ',
+    'pace.title.b': 'forecast',
+    'mkt.eyebrow': 'Capítulo V',
+    'mkt.title.a': 'Os ',
+    'mkt.title.b': 'mercados',
+    'mkt.title.c': ' em movimento',
+    'kpi.occ': 'Ocupação',
+    'kpi.adr': 'Tarifa média (ADR)',
+    'kpi.revpar': 'Receita por quarto (RevPAR)',
+    'kpi.rev': 'Receita do dia',
+    'kpi.pickup': 'Novas reservas, 7 dias',
+    'kpi.otb': 'Reservas confirmadas, 30 dias',
+    'kpi.openDetail': 'abrir detalhe',
+    'delta.yoy': 'vs. ano passado',
+    'delta.fcast': 'vs. previsão',
+    'delta.budget': 'vs. orçamento',
+    'delta.priorWeek': 'vs. semana anterior',
+    'unit.rooms': 'quartos',
+    'unit.nights': 'noites',
+    'coming.eyebrow': 'Próximo capítulo',
+    'foot.occupancy': 'Ocupação',
+    'foot.adr': 'Tarifa média',
+    'foot.revenue': 'Receita',
+    'foot.pickup': 'Novas reservas, 7 dias',
+    'drill.last3y': 'Histórico, 3 anos',
+    'drill.breakdown': 'Decomposição',
+    'drill.actions': 'Sugestões',
+    'drill.thisYear': 'este ano',
+    'drill.lastYear': 'ano anterior',
+    'drill.byChannel': 'por canal',
+    'drill.byMarket': 'por mercado',
+    'today': 'Hoje',
+    'lang.label': 'EN',
+    'theme.label.dark': 'Modo escuro',
+    'theme.label.light': 'Modo claro',
+    'week.title.a': 'A ', 'week.title.b': 'semana', 'week.title.c': ' em revista',
+    'week.dek': 'A narrativa tática: campanhas a correr, ritmo de reservas, sinais de alerta.',
+    'week.coming.a': 'A vista semanal ', 'week.coming.b': 'está em construção',
+    'week.copy': 'Novas reservas dia a dia, campanhas ativas com o seu desempenho ao lado, e desvios face à semana homóloga. Em foco na próxima entrega.',
+    'month.title.a': 'O ', 'month.title.b': 'mês', 'month.title.c': ' sob lente estratégica',
+    'month.dek': 'Budget vs. actual, comparações homólogas, tendências de longo curso.',
+    'month.coming.a': 'A vista mensal ', 'month.coming.b': 'chega na Fase II',
+    'month.copy': 'Decomposição mensal por canal, segmento e mercado. Comparação com o ano passado em todos os indicadores. Previsão, orçamento e realizado, com narrativa contextualizada.',
+    'origins.title.a': 'De onde ', 'origins.title.b': 'vêm os hóspedes',
+    'origins.dek': 'Canais, mercados e nacionalidades num único mapa narrativo.',
+    'origins.coming.a': 'Mapa de origens ', 'origins.coming.b': 'em desenvolvimento',
+    'origins.copy': 'Canal direto, plataformas online e operadores em comparação. Dez principais nacionalidades, tempo médio entre reserva e estadia, duração média da estadia por mercado, e custo de aquisição por canal. Inclui mapa-mundo interativo.',
+    'digital.title.a': 'O ', 'digital.title.b': 'pulso digital',
+    'digital.dek': 'GA4, paid media e o funil completo desde o anúncio até à reserva.',
+    'digital.coming.a': 'Digital Pulse ', 'digital.coming.b': 'chega na Fase III',
+    'digital.copy': 'Integração com Google Analytics, Google Ads e Meta Ads. Funil de conversão editorial, campanhas com melhor desempenho, e comparações com o ano passado em todos os indicadores.',
+    'pacev.title.a': 'Pace & ', 'pacev.title.b': 'Forecast',
+    'pacev.dek': 'Reservas confirmadas, ritmo de novas reservas, projeções para os próximos 90 dias.',
+    'pacev.coming.a': 'Previsão detalhada ', 'pacev.coming.b': 'na Fase II',
+    'pacev.copy': 'Curvas de novas reservas, reservas confirmadas face ao ano passado, previsão face ao orçamento. Reaproveita a lógica do projeto vtrl-room-forecast.',
+    'archive.title.a': 'O ', 'archive.title.b': 'arquivo',
+    'archive.dek': 'Snapshots semanais guardados, evolução histórica, anotações em timeline.',
+    'archive.coming.a': 'Arquivo histórico ', 'archive.coming.b': 'na Fase IV',
+    'archive.copy': 'Registos semanais automáticos, comparações de longo prazo, anotações ancoradas em datas específicas que aparecem ao passar o cursor.',
+    'sources.title.a': 'O ', 'sources.title.b': 'backstage',
+    'sources.dek': 'Uploads de Opera, SiteMinder, GA4. Configurações, export/import, integrações.',
+    'sources.coming.a': 'Painel de fontes ', 'sources.coming.b': 'em desenho',
+    'sources.copy': 'Carregamento de Production Report, Market Segment Statistics, Source of Business e outros relatórios. Exportação e importação do estado completo em ficheiro.',
+    'months': ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
+    'weekdays': ['domingo','segunda','terça','quarta','quinta','sexta','sábado'],
+  },
+  en: {
+    'masthead.sub': 'Marketing Intelligence',
+    'masthead.issue': 'Volume I · Issue No. 01',
+    'masthead.yoy': 'vs. 2025',
+    'nav.daily': 'Daily',
+    'nav.strategy': 'Strategy',
+    'nav.backstage': 'Backstage',
+    'nav.today': 'Today',
+    'nav.week': 'The Week',
+    'nav.month': 'The Month',
+    'nav.origins': 'Origins',
+    'nav.digital': 'Digital',
+    'nav.pace': 'Pace & Forecast',
+    'nav.archive': 'Archive',
+    'nav.sources': 'Sources',
+    'range.today': 'Today',
+    'range.week': 'Week',
+    'range.mtd': 'Month',
+    'range.ytd': 'Year',
+    'story.live': 'Live',
+    'kpi.eyebrow': 'Chapter I',
+    'kpi.title.a': 'Performance, ',
+    'kpi.title.b': 'in brief',
+    'kpi.dek': 'The six numbers that matter today, compared with last year and with forecast.',
+    'rev.eyebrow': 'Chapter II',
+    'rev.title.a': 'The trajectory of ',
+    'rev.title.b': 'revenue',
+    'seg.eyebrow': 'Chapter III',
+    'seg.title.a': 'Where the ',
+    'seg.title.b': 'guests',
+    'seg.title.c': ' come from',
+    'pace.eyebrow': 'Chapter IV',
+    'pace.title.a': 'Pickup vs. ',
+    'pace.title.b': 'forecast',
+    'mkt.eyebrow': 'Chapter V',
+    'mkt.title.a': 'Markets ',
+    'mkt.title.b': 'in motion',
+    'kpi.occ': 'Occupancy',
+    'kpi.adr': 'Average rate (ADR)',
+    'kpi.revpar': 'Revenue per room (RevPAR)',
+    'kpi.rev': "Today's revenue",
+    'kpi.pickup': 'New bookings, 7 days',
+    'kpi.otb': 'Confirmed bookings, 30 days',
+    'kpi.openDetail': 'open detail',
+    'delta.yoy': 'vs. last year',
+    'delta.fcast': 'vs. forecast',
+    'delta.budget': 'vs. budget',
+    'delta.priorWeek': 'vs. prior week',
+    'unit.rooms': 'rooms',
+    'unit.nights': 'nights',
+    'coming.eyebrow': 'Next chapter',
+    'foot.occupancy': 'Occupancy',
+    'foot.adr': 'Average rate',
+    'foot.revenue': 'Revenue',
+    'foot.pickup': 'New bookings, 7 days',
+    'drill.last3y': 'History, 3 years',
+    'drill.breakdown': 'Breakdown',
+    'drill.actions': 'Suggestions',
+    'drill.thisYear': 'this year',
+    'drill.lastYear': 'last year',
+    'drill.byChannel': 'by channel',
+    'drill.byMarket': 'by market',
+    'today': 'Today',
+    'lang.label': 'PT',
+    'theme.label.dark': 'Dark mode',
+    'theme.label.light': 'Light mode',
+    'week.title.a': 'The ', 'week.title.b': 'week', 'week.title.c': ' in review',
+    'week.dek': 'The tactical narrative: live campaigns, booking rhythm, early warnings.',
+    'week.coming.a': 'The weekly view ', 'week.coming.b': 'is in the making',
+    'week.copy': 'Daily new bookings, live campaigns alongside their performance, and deviations versus the same week last year. Coming next.',
+    'month.title.a': 'The ', 'month.title.b': 'month', 'month.title.c': ' through a strategic lens',
+    'month.dek': 'Budget vs. actual, year-on-year, long-arc trends.',
+    'month.coming.a': 'The monthly view ', 'month.coming.b': 'arrives in Phase II',
+    'month.copy': 'Monthly breakdown by channel, segment and market. Year-on-year across every indicator. Forecast, budget and actuals, with contextual narrative.',
+    'origins.title.a': 'Where ', 'origins.title.b': 'guests come from',
+    'origins.dek': 'Channels, markets and nationalities on a single narrative map.',
+    'origins.coming.a': 'Origins map ', 'origins.coming.b': 'in the making',
+    'origins.copy': 'Direct, online platforms and tour operators compared. Top ten nationalities, average time between booking and stay, average length of stay by market, and acquisition cost by channel. Includes an interactive world map.',
+    'digital.title.a': 'The ', 'digital.title.b': 'digital pulse',
+    'digital.dek': 'GA4, paid media and the full funnel from ad to booking.',
+    'digital.coming.a': 'Digital Pulse ', 'digital.coming.b': 'arrives in Phase III',
+    'digital.copy': 'Integration with Google Analytics, Google Ads and Meta Ads. Editorial conversion funnel, top-performing campaigns, and year-on-year comparisons across every indicator.',
+    'pacev.title.a': 'Pace & ', 'pacev.title.b': 'Forecast',
+    'pacev.dek': 'Confirmed bookings, booking pace, projections for the next 90 days.',
+    'pacev.coming.a': 'Detailed forecast ', 'pacev.coming.b': 'in Phase II',
+    'pacev.copy': 'Booking pace curves, confirmed bookings vs last year, forecast vs budget. Reuses the vtrl-room-forecast logic.',
+    'archive.title.a': 'The ', 'archive.title.b': 'archive',
+    'archive.dek': 'Weekly snapshots, historical evolution, annotations on timeline.',
+    'archive.coming.a': 'Historical archive ', 'archive.coming.b': 'in Phase IV',
+    'archive.copy': 'Automatic weekly snapshots, long-term comparisons, annotations anchored to specific dates that surface when you hover.',
+    'sources.title.a': 'The ', 'sources.title.b': 'backstage',
+    'sources.dek': 'Opera, SiteMinder, GA4 uploads. Settings, export/import, integrations.',
+    'sources.coming.a': 'Sources panel ', 'sources.coming.b': 'in design',
+    'sources.copy': 'Upload Production Report, Market Segment Statistics, Source of Business and other reports. Export and import the full state as a file.',
+    'months': ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    'weekdays': ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+  }
+};
+
+const t = (key) => I18N[state.lang][key] ?? key;
+
+/* ───────── 3. STATE ───────── */
+const state = {
+  lang: 'pt',
+  theme: 'light',
+  view: 'today',
+  range: 'today',
+  yoy: true,
+  data: null,
+};
+
+function loadPrefs() {
+  try {
+    const raw = localStorage.getItem(CFG.storageKey);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p.lang) state.lang = p.lang;
+      if (p.theme) state.theme = p.theme;
+      if (p.view) state.view = p.view;
+      if (typeof p.yoy === 'boolean') state.yoy = p.yoy;
+    }
+  } catch (e) {}
+}
+function savePrefs() {
+  try {
+    localStorage.setItem(CFG.storageKey, JSON.stringify({
+      lang: state.lang, theme: state.theme, view: state.view, yoy: state.yoy,
+    }));
+  } catch (e) {}
+}
+
+/* ───────── 4. DATA GENERATOR ─────────
+   3 years of synthetic daily data with Algarve seasonality. Deterministic seed.
+*/
+// Seeded PRNG (mulberry32)
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = a;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function daysBetween(a, b) {
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
+}
+function addDays(iso, n) {
+  const d = new Date(iso);
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function dayOfYear(iso) {
+  const d = new Date(iso);
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+function yearOf(iso) { return new Date(iso).getFullYear(); }
+function dowOf(iso)  { return new Date(iso).getDay(); }
+
+// Algarve seasonality curve — peak Jul/Aug, soft Apr-Jun & Sep-Oct, low winter
+function seasonOcc(iso) {
+  const doy = dayOfYear(iso);
+  // base sinusoid centered around mid-July (~day 195)
+  const wave = Math.cos(((doy - 195) / 365) * 2 * Math.PI);
+  // Map [-1..1] → occupancy roughly [0.20 ... 0.94]
+  let occ = 0.57 + wave * 0.37;
+  // Saturday weekend boost in shoulder/peak
+  const dow = dowOf(iso);
+  if (dow === 5 || dow === 6) occ += 0.04;
+  if (dow === 0) occ += 0.02;
+  if (dow === 1) occ -= 0.02;
+  return Math.max(0.18, Math.min(0.985, occ));
+}
+
+function seasonADR(iso) {
+  const doy = dayOfYear(iso);
+  const wave = Math.cos(((doy - 200) / 365) * 2 * Math.PI);
+  // €165 winter → €395 peak
+  return 280 + wave * 115;
+}
+
+function generateData() {
+  // 3 years backward from today, plus 90 days forward (forecast/OTB)
+  const start = addDays(CFG.todayISO, -365 * 3);
+  const end   = addDays(CFG.todayISO, 90);
+  const totalDays = daysBetween(start, end);
+
+  const rng = mulberry32(20260525);
+
+  const days = [];
+  for (let i = 0; i <= totalDays; i++) {
+    const iso = addDays(start, i);
+    const yr = yearOf(iso);
+    // YoY growth: 2025 vs 2024 = +6%, 2026 vs 2025 = +8% (post-pandemic recovery story)
+    const growth = yr === 2023 ? 0.94 : yr === 2024 ? 1.00 : yr === 2025 ? 1.06 : 1.135;
+
+    const baseOcc = seasonOcc(iso);
+    const noise = (rng() - 0.5) * 0.07;
+    const occ = Math.max(0.10, Math.min(0.995, baseOcc * (0.96 + (growth - 1) * 0.6) + noise));
+
+    const adr = seasonADR(iso) * (0.97 + (growth - 1) * 1.05) * (1 + (rng() - 0.5) * 0.06);
+    const roomsSold = Math.round(occ * CFG.rooms);
+    const revenue = roomsSold * adr;
+    const revpar = revenue / CFG.rooms;
+
+    // Forecast and budget (only for 2026)
+    const fcast = yr === 2026 ? revenue * (0.96 + (rng() - 0.5) * 0.04) : null;
+    const budget = yr === 2026 ? revenue * (0.93 + (rng() - 0.5) * 0.05) : null;
+
+    // Sessions, spend
+    const seasonalTraffic = 0.5 + (baseOcc - 0.18) * 1.2;
+    const sessions = Math.round((2200 + rng() * 500) * seasonalTraffic * growth);
+    const spend = Math.round((180 + rng() * 80) * seasonalTraffic * growth);
+
+    // Channel mix shifts slightly: direct grows YoY (good story)
+    const directBoost = yr === 2026 ? 0.04 : yr === 2025 ? 0.02 : 0;
+
+    days.push({
+      iso,
+      occ,
+      adr,
+      roomsSold,
+      revenue,
+      revpar,
+      fcast,
+      budget,
+      sessions,
+      spend,
+      directBoost,
+      nonce: rng(),
+    });
+  }
+
+  // Build channel and market breakdowns for "today" and recent ranges
+  // We do it on demand in the analyzer to keep memory light, but seed each day with normalized splits
+  for (const d of days) {
+    const cs = {};
+    let total = 0;
+    for (const ch of CHANNELS) {
+      let s = ch.share;
+      if (ch.code === 'direct')  s += d.directBoost;
+      if (ch.code === 'booking') s -= d.directBoost * 0.6;
+      if (ch.code === 'expedia') s -= d.directBoost * 0.4;
+      // Tiny daily jitter
+      s = Math.max(0.01, s + (d.nonce - 0.5) * 0.02);
+      cs[ch.code] = s; total += s;
+    }
+    for (const k in cs) cs[k] /= total;
+    d.channelShare = cs;
+
+    const ms = {};
+    let mt = 0;
+    for (const mk of MARKETS) {
+      let s = mk.share + (d.nonce - 0.5) * 0.015;
+      // German + UK do better in summer; PT in winter (locals on staycation)
+      const seasonBoost = seasonOcc(d.iso);
+      if (mk.code === 'DE' || mk.code === 'UK') s *= 0.85 + seasonBoost * 0.35;
+      if (mk.code === 'PT') s *= 1.25 - seasonBoost * 0.4;
+      s = Math.max(0.005, s);
+      ms[mk.code] = s; mt += s;
+    }
+    for (const k in ms) ms[k] /= mt;
+    d.marketShare = ms;
+  }
+
+  return { days, byISO: Object.fromEntries(days.map(d => [d.iso, d])) };
+}
+
+/* ───────── 5. ANALYZER ───────── */
+function dayData(iso) { return state.data.byISO[iso]; }
+
+function rangeData(rangeKey, anchorISO = CFG.todayISO) {
+  let startISO, endISO;
+  if (rangeKey === 'today') { startISO = endISO = anchorISO; }
+  else if (rangeKey === '7d') { startISO = addDays(anchorISO, -6); endISO = anchorISO; }
+  else if (rangeKey === 'mtd') {
+    const d = new Date(anchorISO); d.setDate(1);
+    startISO = d.toISOString().slice(0,10); endISO = anchorISO;
+  } else if (rangeKey === 'ytd') {
+    startISO = anchorISO.slice(0,4) + '-01-01'; endISO = anchorISO;
+  }
+  const out = [];
+  let cur = startISO;
+  while (cur <= endISO) { out.push(dayData(cur)); cur = addDays(cur, 1); }
+  return out;
+}
+
+function stlyAnchor(iso) {
+  // Same Tuesday in previous year — match by weekday and same week-of-year
+  const d = new Date(iso);
+  const lastYr = new Date(d); lastYr.setFullYear(d.getFullYear() - 1);
+  // Snap to same weekday
+  const dowNow = d.getDay();
+  const dowLast = lastYr.getDay();
+  let diff = dowNow - dowLast;
+  if (diff > 3) diff -= 7;
+  if (diff < -3) diff += 7;
+  lastYr.setDate(lastYr.getDate() + diff);
+  return lastYr.toISOString().slice(0,10);
+}
+
+function aggregate(days) {
+  const valid = days.filter(Boolean);
+  if (!valid.length) return null;
+  const roomsSold = valid.reduce((s,d) => s + d.roomsSold, 0);
+  const revenue = valid.reduce((s,d) => s + d.revenue, 0);
+  const rooms = valid.length * CFG.rooms;
+  const occ = roomsSold / rooms;
+  const adr = revenue / Math.max(1, roomsSold);
+  const revpar = revenue / Math.max(1, rooms);
+  const fcast = valid.reduce((s,d) => s + (d.fcast ?? 0), 0);
+  const budget = valid.reduce((s,d) => s + (d.budget ?? 0), 0);
+  return { roomsSold, revenue, occ, adr, revpar, fcast, budget, n: valid.length };
+}
+
+function pct(now, prev) {
+  if (!prev || prev === 0) return 0;
+  return (now - prev) / prev;
+}
+
+function computeKPIs() {
+  const today = dayData(CFG.todayISO);
+  const stly = dayData(stlyAnchor(CFG.todayISO));
+
+  // OTB next 30d
+  const otbDays = [];
+  for (let i = 1; i <= 30; i++) otbDays.push(dayData(addDays(CFG.todayISO, i)));
+  const otb = aggregate(otbDays);
+
+  const otbStlyDays = [];
+  for (let i = 1; i <= 30; i++) otbStlyDays.push(dayData(addDays(stlyAnchor(CFG.todayISO), i)));
+  const otbStly = aggregate(otbStlyDays);
+
+  // Pickup 7d (rooms sold next 7 days)
+  const pkDays = [];
+  for (let i = 1; i <= 7; i++) pkDays.push(dayData(addDays(CFG.todayISO, i)));
+  const pkAgg = aggregate(pkDays);
+
+  const pkStlyDays = [];
+  for (let i = 1; i <= 7; i++) pkStlyDays.push(dayData(addDays(stlyAnchor(CFG.todayISO), i)));
+  const pkStlyAgg = aggregate(pkStlyDays);
+
+  return {
+    occ: {
+      key: 'occ',
+      labelKey: 'kpi.occ',
+      value: today.occ,
+      yoy: pct(today.occ, stly.occ),
+      fcast: today.fcast ? pct(today.revenue / today.revenue, 1) : 0,
+      sparkSrc: 'occ',
+    },
+    adr: {
+      key: 'adr',
+      labelKey: 'kpi.adr',
+      value: today.adr,
+      yoy: pct(today.adr, stly.adr),
+      fcast: 0,
+      sparkSrc: 'adr',
+    },
+    revpar: {
+      key: 'revpar',
+      labelKey: 'kpi.revpar',
+      value: today.revpar,
+      yoy: pct(today.revpar, stly.revpar),
+      sparkSrc: 'revpar',
+    },
+    revenue: {
+      key: 'revenue',
+      labelKey: 'kpi.rev',
+      value: today.revenue,
+      yoy: pct(today.revenue, stly.revenue),
+      fcast: today.fcast ? pct(today.revenue, today.fcast) : 0,
+      sparkSrc: 'revenue',
+    },
+    pickup: {
+      key: 'pickup',
+      labelKey: 'kpi.pickup',
+      value: pkAgg.roomsSold,
+      yoy: pct(pkAgg.roomsSold, pkStlyAgg.roomsSold),
+      sparkSrc: 'pickup',
+    },
+    otb: {
+      key: 'otb',
+      labelKey: 'kpi.otb',
+      value: otb.occ,
+      yoy: pct(otb.occ, otbStly.occ),
+      sparkSrc: 'otb',
+      revenue: otb.revenue,
+    },
+  };
+}
+
+function sparklineData(src) {
+  // 30 days ending today
+  const arr = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = dayData(addDays(CFG.todayISO, -i));
+    if (src === 'occ') arr.push(d.occ);
+    else if (src === 'adr') arr.push(d.adr);
+    else if (src === 'revpar') arr.push(d.revpar);
+    else if (src === 'revenue') arr.push(d.revenue);
+    else if (src === 'pickup' || src === 'otb') arr.push(d.occ);
+  }
+  return arr;
+}
+
+/* ───────── 6. FORMATTERS ───────── */
+const fmt = {
+  pct: (v, digits = 1) => (v * 100).toFixed(digits).replace('.', state.lang === 'pt' ? ',' : '.') + '%',
+  pctSign: (v, digits = 1) => (v >= 0 ? '+' : '') + (v * 100).toFixed(digits).replace('.', state.lang === 'pt' ? ',' : '.') + '%',
+  money: (v, dec = 0) => {
+    const opts = { style: 'currency', currency: 'EUR', minimumFractionDigits: dec, maximumFractionDigits: dec };
+    return new Intl.NumberFormat(state.lang === 'pt' ? 'pt-PT' : 'en-GB', opts).format(v);
+  },
+  moneyShort: (v) => {
+    if (v >= 1_000_000) return fmt.money(v / 1_000_000, 2).replace('€', '€') + 'M';
+    if (v >= 10_000) return fmt.money(Math.round(v / 1000) * 1000, 0);
+    return fmt.money(v, 0);
+  },
+  int: (v) => new Intl.NumberFormat(state.lang === 'pt' ? 'pt-PT' : 'en-GB').format(Math.round(v)),
+  signed: (v, digits = 1) => (v >= 0 ? '+' : '') + v.toFixed(digits).replace('.', state.lang === 'pt' ? ',' : '.'),
+  date: (iso) => {
+    const d = new Date(iso);
+    const w = I18N[state.lang]['weekdays'][d.getDay()];
+    const m = I18N[state.lang]['months'][d.getMonth()];
+    if (state.lang === 'pt') {
+      return `${cap(w)}, ${d.getDate()} de ${m} de ${d.getFullYear()}`;
+    }
+    return `${cap(w)}, ${d.getDate()} ${cap(m)} ${d.getFullYear()}`;
+  },
+  dateShort: (iso) => {
+    const d = new Date(iso);
+    const m = I18N[state.lang]['months'][d.getMonth()];
+    return state.lang === 'pt' ? `${d.getDate()} ${m.slice(0,3)}` : `${d.getDate()} ${cap(m.slice(0,3))}`;
+  },
+};
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ───────── 7. STORYTELLING ENGINE ───────── */
+/* Approach: collect candidate "facts" with salience scores, pick top 3, weave into a paragraph.
+   Each fact has multiple phrasings (varied syntax) so the story doesn't feel templated. */
+
+function buildStory() {
+  const k = computeKPIs();
+  const today = dayData(CFG.todayISO);
+  const stly = dayData(stlyAnchor(CFG.todayISO));
+
+  // Top growing market over last 7d vs STLY
+  let topMarket = null, topMarketDelta = -1;
+  for (const mk of MARKETS) {
+    let now = 0, prev = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = dayData(addDays(CFG.todayISO, -i));
+      const p = dayData(addDays(stlyAnchor(CFG.todayISO), -i));
+      now += d.roomsSold * d.marketShare[mk.code];
+      prev += p.roomsSold * p.marketShare[mk.code];
+    }
+    const delta = pct(now, prev);
+    if (delta > topMarketDelta) { topMarketDelta = delta; topMarket = { ...mk, now, delta }; }
+  }
+
+  // Direct channel trend last 7d
+  let directNow = 0, directPrev = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = dayData(addDays(CFG.todayISO, -i));
+    const p = dayData(addDays(stlyAnchor(CFG.todayISO), -i));
+    directNow += d.roomsSold * d.channelShare.direct;
+    directPrev += p.roomsSold * p.channelShare.direct;
+  }
+  const directDelta = pct(directNow, directPrev);
+
+  // OTA decline?
+  let otaNow = 0, otaPrev = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = dayData(addDays(CFG.todayISO, -i));
+    const p = dayData(addDays(stlyAnchor(CFG.todayISO), -i));
+    otaNow += d.roomsSold * (d.channelShare.booking + d.channelShare.expedia);
+    otaPrev += p.roomsSold * (p.channelShare.booking + p.channelShare.expedia);
+  }
+  const otaDelta = pct(otaNow, otaPrev);
+
+  // Forecast variance today
+  const fcastDelta = today.fcast ? pct(today.revenue, today.fcast) : 0;
+
+  // OTB 30d
+  const otbDelta = k.otb.yoy;
+
+  // ── Build paragraph ──
+  const L = state.lang;
+  const occStr = fmt.pct(today.occ, 0);
+  const occYoyAbs = ((today.occ - stly.occ) * 100);
+  const occYoyStr = (occYoyAbs >= 0 ? '+' : '') + occYoyAbs.toFixed(1).replace('.', L === 'pt' ? ',' : '.') + (L === 'pt' ? ' pontos' : ' points');
+  const adrStr = fmt.money(today.adr, 0);
+  const topMktName = topMarket.label[L];
+
+  let headline, body;
+
+  if (L === 'pt') {
+    if (otbDelta > 0.08) {
+      headline = `As reservas para os próximos trinta dias estão <em>significativamente acima do ano passado</em>.`;
+    } else if (directDelta > 0.10) {
+      headline = `O canal direto continua a ganhar peso, <em>uma boa notícia para a margem</em>.`;
+    } else if (today.occ > stly.occ + 0.04) {
+      headline = `Hoje o resort está mais cheio do que estava nesta altura no ano passado.`;
+    } else if (fcastDelta < -0.05) {
+      headline = `A receita de hoje fica <em>aquém do esperado</em>, vale a pena perceber porquê.`;
+    } else {
+      headline = `Um dia dentro da normalidade, <em>com nuances que importam</em>.`;
+    }
+
+    const part1 = `A ocupação de hoje fixa-se nos <strong>${occStr}</strong>, ${occYoyAbs >= 0 ? `<span class="pos">${occYoyStr}</span> acima` : `<span class="neg">${occYoyStr}</span> abaixo`} da mesma ${I18N.pt.weekdays[new Date(CFG.todayISO).getDay()]} do ano passado, com a tarifa média nos <strong>${adrStr}</strong>.`;
+
+    let part2 = ` O mercado <strong>${topMktName}</strong> ${topMarketDelta >= 0 ? `lidera as novas reservas da semana, com <span class="pos">${fmt.pctSign(topMarketDelta, 0)}</span> face a 2025` : `mostra sinais de abrandamento, com <span class="neg">${fmt.pctSign(topMarketDelta, 0)}</span> face a 2025`}.`;
+
+    let part3 = '';
+    if (directDelta > 0.05) {
+      part3 = ` As reservas diretas crescem <span class="pos">${fmt.pctSign(directDelta, 0)}</span> nos últimos sete dias, sinal de que a estratégia de canal próprio está a render.`;
+    } else if (otaDelta < -0.05) {
+      part3 = ` As plataformas online perdem peso, <span class="neg">${fmt.pctSign(otaDelta, 0)}</span> nos últimos sete dias, refletindo o reposicionamento gradual para canais próprios.`;
+    } else {
+      part3 = ` A distribuição de canais mantém-se estável, com o canal direto a representar <strong>${fmt.pct(today.channelShare.direct, 0)}</strong> do volume.`;
+    }
+
+    let part4 = '';
+    if (otbDelta > 0.05) {
+      part4 = ` Para os próximos trinta dias, as reservas confirmadas estão <span class="pos">${fmt.pctSign(otbDelta, 0)}</span> acima do ano passado, um sinal sólido a entrar no pico de verão.`;
+    } else if (otbDelta < -0.05) {
+      part4 = ` As reservas confirmadas para os próximos trinta dias preocupam, com <span class="neg">${fmt.pctSign(otbDelta, 0)}</span> face a 2025. Vale a pena rever as últimas campanhas.`;
+    } else {
+      part4 = ` As reservas confirmadas para os próximos trinta dias acompanham o ano passado.`;
+    }
+
+    body = part1 + part2 + part3 + part4;
+  } else {
+    if (otbDelta > 0.08) {
+      headline = `Bookings for the next thirty days are <em>running well ahead of last year</em>.`;
+    } else if (directDelta > 0.10) {
+      headline = `Direct keeps gaining share, <em>good news for the margin</em>.`;
+    } else if (today.occ > stly.occ + 0.04) {
+      headline = `Today the resort runs fuller than it did at this time last year.`;
+    } else if (fcastDelta < -0.05) {
+      headline = `Today's revenue falls <em>short of forecast</em>, worth a closer look.`;
+    } else {
+      headline = `A day inside the norm, <em>with nuances that matter</em>.`;
+    }
+
+    const part1 = `Occupancy lands at <strong>${occStr}</strong>, ${occYoyAbs >= 0 ? `<span class="pos">${occYoyStr}</span> above` : `<span class="neg">${occYoyStr}</span> below`} the same ${I18N.en.weekdays[new Date(CFG.todayISO).getDay()]} a year ago, with the average rate holding at <strong>${adrStr}</strong>.`;
+
+    let part2 = ` <strong>${topMktName}</strong> ${topMarketDelta >= 0 ? `leads new bookings for the week, <span class="pos">${fmt.pctSign(topMarketDelta, 0)}</span> vs. 2025` : `is softening, <span class="neg">${fmt.pctSign(topMarketDelta, 0)}</span> vs. 2025`}.`;
+
+    let part3 = '';
+    if (directDelta > 0.05) {
+      part3 = ` Direct bookings are up <span class="pos">${fmt.pctSign(directDelta, 0)}</span> over the past seven days, a sign that the own-channel strategy is paying off.`;
+    } else if (otaDelta < -0.05) {
+      part3 = ` Online platforms are losing share, <span class="neg">${fmt.pctSign(otaDelta, 0)}</span> over the past seven days, reflecting a gradual rebalancing toward owned channels.`;
+    } else {
+      part3 = ` Channel distribution is steady, with direct holding <strong>${fmt.pct(today.channelShare.direct, 0)}</strong> of volume.`;
+    }
+
+    let part4 = '';
+    if (otbDelta > 0.05) {
+      part4 = ` Confirmed bookings for the next thirty days sit <span class="pos">${fmt.pctSign(otbDelta, 0)}</span> above last year, a solid signal heading into peak.`;
+    } else if (otbDelta < -0.05) {
+      part4 = ` Confirmed bookings for the next thirty days raise concern, <span class="neg">${fmt.pctSign(otbDelta, 0)}</span> vs. 2025. Worth reviewing the latest campaigns.`;
+    } else {
+      part4 = ` Confirmed bookings for the next thirty days track last year.`;
+    }
+
+    body = part1 + part2 + part3 + part4;
+  }
+
+  // Foot tags — 4 micro-readouts
+  const foot = [
+    { label: t('foot.occupancy'), value: fmt.pct(today.occ, 0), klass: today.occ >= stly.occ ? 'pos' : 'neg' },
+    { label: t('foot.adr'),       value: fmt.money(today.adr, 0), klass: today.adr >= stly.adr ? 'pos' : 'neg' },
+    { label: t('foot.revenue'),   value: fmt.moneyShort(today.revenue), klass: today.revenue >= stly.revenue ? 'pos' : 'neg' },
+    { label: t('foot.pickup'),    value: fmt.int(k.pickup.value) + ' ' + t('unit.nights'), klass: k.pickup.yoy >= 0 ? 'pos' : 'neg' },
+  ];
+
+  return { headline, body, foot };
+}
+
+/* ───────── 8. SPARKLINE (inline SVG) ───────── */
+function sparkSVG(values, width = 88, height = 28, klass = 'pos') {
+  if (!values.length) return '';
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * width;
+    const y = height - ((v - min) / range) * (height - 2) - 1;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const color = klass === 'pos' ? 'var(--moss)' : 'var(--terra)';
+  const lastX = width;
+  const lastY = height - ((values[values.length - 1] - min) / range) * (height - 2) - 1;
+  return `
+    <svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+      <circle cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="1.8" fill="${color}"/>
+    </svg>
+  `;
+}
+
+/* ───────── 9. RENDER — masthead + nav ───────── */
+function applyI18n() {
+  document.documentElement.lang = state.lang;
+  document.body.dataset.lang = state.lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (typeof val === 'string') el.textContent = val;
+  });
+  // Composite headlines with <em>
+  setHeadline('kpi.title', 'h2', (a, b) => `${a}<em>${b}</em>`);
+  setHeadline('rev.title', 'h3', (a, b) => `${a}<em>${b}</em>`);
+  setHeadline('seg.title', 'h3', (a, b, c) => `${a}<em>${b}</em>${c ?? ''}`);
+  setHeadline('pace.title', 'h3', (a, b) => `${a}<em>${b}</em>`);
+  setHeadline('mkt.title', 'h3', (a, b, c) => `${a}<em>${b}</em>${c ?? ''}`);
+  setHeadline('week.title', 'h2', (a, b, c) => `${a}<em>${b}</em>${c ?? ''}`);
+  setHeadline('month.title', 'h2', (a, b, c) => `${a}<em>${b}</em>${c ?? ''}`);
+  setHeadline('origins.title', 'h2', (a, b) => `${a}<em>${b}</em>`);
+  setHeadline('digital.title', 'h2', (a, b) => `${a}<em>${b}</em>`);
+  setHeadline('pacev.title', 'h2', (a, b) => `${a}<em>${b}</em>`);
+  setHeadline('archive.title', 'h2', (a, b) => `${a}<em>${b}</em>`);
+  setHeadline('sources.title', 'h2', (a, b) => `${a}<em>${b}</em>`);
+  setComingHeadline('week.coming');
+  setComingHeadline('month.coming');
+  setComingHeadline('origins.coming');
+  setComingHeadline('digital.coming');
+  setComingHeadline('pacev.coming');
+  setComingHeadline('archive.coming');
+  setComingHeadline('sources.coming');
+
+  document.getElementById('lang-label').textContent = t('lang.label');
+  document.getElementById('theme-label').textContent = state.theme === 'light' ? t('theme.label.dark') : t('theme.label.light');
+
+  // Masthead date
+  document.getElementById('masthead-date').innerHTML = formatMastheadDate();
+}
+
+function setHeadline(prefix, tag, joiner) {
+  // Find <h2>/<h3> whose ancestor has matching data-i18n for prefix...
+  // Simpler: query elements that have the data-i18n on their .em piece via custom marker.
+  // We'll match by checking parent block's [data-i18n] children.
+  // Cleaner approach: target by location — find <section> containing prefix-keyed dek.
+  // Implementation below: store mapping by id-like patterns.
+  // To avoid over-engineering, traverse all matching headlines explicitly via section ids:
+}
+
+// Simpler: build the headlines imperatively by section.
+function setComingHeadline(prefix) {
+  const node = document.querySelector(`[data-i18n="${prefix}"]`);
+  if (!node) return;
+  const a = t(prefix + '.a'), b = t(prefix + '.b');
+  if (a && b) node.innerHTML = `${a}<em>${b}</em>`;
+}
+
+function rebuildEditorialHeadlines() {
+  // KPI section
+  const kpiH2 = document.querySelector('section.section .section-titles h2[data-i18n="kpi.title"]');
+  if (kpiH2) kpiH2.innerHTML = `${t('kpi.title.a')}<em>${t('kpi.title.b')}</em>`;
+  document.querySelectorAll('h3[data-i18n="rev.title"]').forEach(h => h.innerHTML = `${t('rev.title.a')}<em>${t('rev.title.b')}</em>`);
+  document.querySelectorAll('h3[data-i18n="seg.title"]').forEach(h => h.innerHTML = `${t('seg.title.a')}<em>${t('seg.title.b')}</em>${t('seg.title.c') ?? ''}`);
+  document.querySelectorAll('h3[data-i18n="pace.title"]').forEach(h => h.innerHTML = `${t('pace.title.a')}<em>${t('pace.title.b')}</em>`);
+  document.querySelectorAll('h3[data-i18n="mkt.title"]').forEach(h => h.innerHTML = `${t('mkt.title.a')}<em>${t('mkt.title.b')}</em>${t('mkt.title.c') ?? ''}`);
+
+  document.querySelectorAll('h2[data-i18n="week.title"]').forEach(h => h.innerHTML = `${t('week.title.a')}<em>${t('week.title.b')}</em>${t('week.title.c') ?? ''}`);
+  document.querySelectorAll('h2[data-i18n="month.title"]').forEach(h => h.innerHTML = `${t('month.title.a')}<em>${t('month.title.b')}</em>${t('month.title.c') ?? ''}`);
+  document.querySelectorAll('h2[data-i18n="origins.title"]').forEach(h => h.innerHTML = `${t('origins.title.a')}<em>${t('origins.title.b')}</em>`);
+  document.querySelectorAll('h2[data-i18n="digital.title"]').forEach(h => h.innerHTML = `${t('digital.title.a')}<em>${t('digital.title.b')}</em>`);
+  document.querySelectorAll('h2[data-i18n="pacev.title"]').forEach(h => h.innerHTML = `${t('pacev.title.a')}<em>${t('pacev.title.b')}</em>`);
+  document.querySelectorAll('h2[data-i18n="archive.title"]').forEach(h => h.innerHTML = `${t('archive.title.a')}<em>${t('archive.title.b')}</em>`);
+  document.querySelectorAll('h2[data-i18n="sources.title"]').forEach(h => h.innerHTML = `${t('sources.title.a')}<em>${t('sources.title.b')}</em>`);
+}
+
+function formatMastheadDate() {
+  const d = new Date(CFG.todayISO);
+  const w = I18N[state.lang]['weekdays'][d.getDay()];
+  const m = I18N[state.lang]['months'][d.getMonth()];
+  if (state.lang === 'pt') {
+    return `${cap(w)}, <em>${d.getDate()} de ${m}</em> de ${d.getFullYear()}`;
+  }
+  return `${cap(w)}, <em>${d.getDate()} ${cap(m)}</em> ${d.getFullYear()}`;
+}
+
+/* ───────── 10. RENDER — story ───────── */
+function renderStory() {
+  const s = buildStory();
+  document.getElementById('story-headline').innerHTML = s.headline;
+  document.getElementById('story-body').innerHTML = s.body;
+  document.getElementById('story-meta').textContent = formatStoryMeta();
+
+  const foot = document.getElementById('story-foot');
+  foot.innerHTML = s.foot.map(f => `
+    <div class="story-tag">
+      <span>${f.label}</span>
+      <span class="v ${f.klass}">${f.value}</span>
+    </div>
+  `).join('');
+}
+function formatStoryMeta() {
+  const k = computeKPIs();
+  const occ = fmt.pct(k.occ.value, 0);
+  const adr = fmt.money(k.adr.value, 0);
+  return state.lang === 'pt'
+    ? `Ocupação ${occ}, tarifa média ${adr}, ${CFG.resort}`
+    : `Occupancy ${occ}, average rate ${adr}, ${CFG.resort}`;
+}
+
+/* ───────── 11. RENDER — KPIs ───────── */
+function renderKPIs() {
+  const k = computeKPIs();
+  const order = ['occ', 'adr', 'revpar', 'revenue', 'pickup', 'otb'];
+
+  const grid = document.getElementById('kpi-grid');
+  grid.innerHTML = order.map(key => {
+    const kpi = k[key];
+    let displayValue, unit = '';
+    if (key === 'occ' || key === 'otb') {
+      displayValue = (kpi.value * 100).toFixed(1).replace('.', state.lang === 'pt' ? ',' : '.');
+      unit = '%';
+    } else if (key === 'pickup') {
+      displayValue = fmt.int(kpi.value);
+      unit = t('unit.nights');
+    } else if (key === 'revenue') {
+      displayValue = fmt.moneyShort(kpi.value);
+    } else {
+      displayValue = fmt.money(kpi.value, 0);
+    }
+
+    const yoyKlass = Math.abs(kpi.yoy) < 0.005 ? 'flat' : (kpi.yoy >= 0 ? 'pos' : 'neg');
+    const yoyStr = fmt.pctSign(kpi.yoy, 1);
+
+    let extraText;
+    if (state.lang === 'pt') {
+      if (key === 'occ')      extraText = `${fmt.int(Math.round(kpi.value * CFG.rooms))} de ${CFG.rooms} quartos ocupados`;
+      else if (key === 'adr') extraText = `Tarifa média diária do resort, hoje`;
+      else if (key === 'revpar') extraText = `Receita gerada por cada quarto disponível`;
+      else if (key === 'revenue') extraText = `Receita de quartos, sem restauração`;
+      else if (key === 'pickup') extraText = `Reservas para os próximos 7 dias`;
+      else if (key === 'otb') extraText = `Ocupação prevista para os próximos 30 dias`;
+    } else {
+      if (key === 'occ')      extraText = `${fmt.int(Math.round(kpi.value * CFG.rooms))} of ${CFG.rooms} rooms occupied`;
+      else if (key === 'adr') extraText = `Resort average daily rate today`;
+      else if (key === 'revpar') extraText = `Revenue per available room`;
+      else if (key === 'revenue') extraText = `Room revenue, excluding food and beverage`;
+      else if (key === 'pickup') extraText = `Bookings for the next 7 days`;
+      else if (key === 'otb') extraText = `Expected occupancy over the next 30 days`;
+    }
+
+    const sparkValues = sparklineData(kpi.sparkSrc);
+    const sparkKlass = kpi.yoy >= 0 ? 'pos' : 'neg';
+
+    return `
+      <button class="kpi" data-kpi="${key}" tabindex="0">
+        <div class="kpi-eyebrow">
+          <span>${t(kpi.labelKey)}</span>
+          <span class="arrow">↗ ${t('kpi.openDetail')}</span>
+        </div>
+        <div class="kpi-value tabular">${displayValue}${unit ? `<span class="unit">${unit}</span>` : ''}</div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta">
+            <span class="label">${t('delta.yoy')}</span>
+            <span class="value ${yoyKlass}">${yoyStr}</span>
+          </div>
+          ${key === 'revenue' && kpi.fcast !== undefined ? `
+          <div class="kpi-delta">
+            <span class="label">${t('delta.fcast')}</span>
+            <span class="value ${Math.abs(kpi.fcast) < 0.005 ? 'flat' : (kpi.fcast >= 0 ? 'pos' : 'neg')}">${fmt.pctSign(kpi.fcast, 1)}</span>
+          </div>` : ''}
+        </div>
+        <div class="kpi-spark">${sparkSVG(sparkValues, 88, 28, sparkKlass)}</div>
+        <div class="kpi-extra">${extraText}</div>
+      </button>
+    `;
+  }).join('');
+
+  // Wire clicks
+  grid.querySelectorAll('.kpi').forEach(btn => {
+    btn.addEventListener('click', () => openDrill(btn.dataset.kpi));
+  });
+}
+
+/* ───────── 12. RENDER — segments & markets ───────── */
+function renderSegments() {
+  const today = dayData(CFG.todayISO);
+  const stly = dayData(stlyAnchor(CFG.todayISO));
+
+  const rows = CHANNELS.map(ch => ({
+    code: ch.code,
+    label: ch.label[state.lang],
+    sub: ch.sub[state.lang],
+    share: today.channelShare[ch.code],
+    prevShare: stly.channelShare[ch.code],
+  })).sort((a,b) => b.share - a.share);
+
+  const maxShare = rows[0].share;
+  const list = document.getElementById('seg-list');
+  list.innerHTML = rows.map(r => {
+    const delta = r.share - r.prevShare;
+    const deltaStr = (delta * 100).toFixed(1).replace('.', state.lang === 'pt' ? ',' : '.');
+    const sign = delta >= 0 ? '+' : '';
+    const klass = Math.abs(delta) < 0.005 ? 'flat' : (delta >= 0 ? 'pos' : 'neg');
+    return `
+      <div class="seg-row">
+        <div class="seg-name">${r.label}<span class="sub">${r.sub}</span></div>
+        <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
+        <div class="seg-val">${fmt.pct(r.share, 0)}<span class="pct ${klass}">${sign}${deltaStr} ${state.lang === 'pt' ? 'pontos' : 'points'}</span></div>
+      </div>
+    `;
+  }).join('');
+
+  const direct = rows.find(r => r.code === 'direct');
+  const directDeltaPP = (direct.share - direct.prevShare) * 100;
+  let insight;
+  if (state.lang === 'pt') {
+    if (directDeltaPP > 1) insight = `O canal <strong>direto</strong> ganha <span class="pos">+${directDeltaPP.toFixed(1).replace('.',',')} pontos</span> de quota face a 2025, uma boa notícia para a margem.`;
+    else if (directDeltaPP < -1) insight = `O canal <strong>direto</strong> perde <span class="neg">${directDeltaPP.toFixed(1).replace('.',',')} pontos</span> de quota face a 2025.`;
+    else insight = `Distribuição de canais estável face a 2025, com <strong>${direct.label}</strong> a manter-se em ${fmt.pct(direct.share, 0)}.`;
+  } else {
+    if (directDeltaPP > 1) insight = `<strong>Direct</strong> gains <span class="pos">+${directDeltaPP.toFixed(1)} points</span> of share vs 2025, good news for the margin.`;
+    else if (directDeltaPP < -1) insight = `<strong>Direct</strong> loses <span class="neg">${directDeltaPP.toFixed(1)} points</span> of share vs 2025.`;
+    else insight = `Channel distribution steady vs 2025, with <strong>${direct.label}</strong> holding at ${fmt.pct(direct.share, 0)}.`;
+  }
+  document.getElementById('seg-insight').innerHTML = insight;
+}
+
+function renderMarkets() {
+  // Aggregate last 7 days
+  let totals = {}, prevs = {};
+  for (let i = 0; i < 7; i++) {
+    const d = dayData(addDays(CFG.todayISO, -i));
+    const p = dayData(addDays(stlyAnchor(CFG.todayISO), -i));
+    for (const mk of MARKETS) {
+      totals[mk.code] = (totals[mk.code] ?? 0) + d.roomsSold * d.marketShare[mk.code];
+      prevs[mk.code]  = (prevs[mk.code]  ?? 0) + p.roomsSold * p.marketShare[mk.code];
+    }
+  }
+  const sumNow = Object.values(totals).reduce((s,v) => s + v, 0);
+  const rows = MARKETS.map(mk => ({
+    code: mk.code,
+    label: mk.label[state.lang],
+    sub: mk.code,
+    share: totals[mk.code] / sumNow,
+    nowAbs: totals[mk.code],
+    prevAbs: prevs[mk.code],
+    delta: pct(totals[mk.code], prevs[mk.code]),
+  })).sort((a,b) => b.share - a.share).slice(0, 6);
+
+  const maxShare = rows[0].share;
+  const list = document.getElementById('mkt-list');
+  list.innerHTML = rows.map(r => {
+    const klass = Math.abs(r.delta) < 0.01 ? 'flat' : (r.delta >= 0 ? 'pos' : 'neg');
+    return `
+      <div class="seg-row">
+        <div class="seg-name">${r.label}<span class="sub">${r.sub}, ${state.lang === 'pt' ? 'últimos 7 dias' : 'last 7 days'}</span></div>
+        <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
+        <div class="seg-val">${fmt.int(r.nowAbs)}<span class="pct ${klass}">${fmt.pctSign(r.delta, 0)}</span></div>
+      </div>
+    `;
+  }).join('');
+
+  const movers = rows.slice().sort((a,b) => b.delta - a.delta);
+  const top = movers[0]; const bottom = movers[movers.length - 1];
+  let insight;
+  if (state.lang === 'pt') {
+    insight = `<strong>${top.label}</strong> lidera as novas reservas com <span class="${top.delta >= 0 ? 'pos' : 'neg'}">${fmt.pctSign(top.delta, 0)}</span> face a 2025. <strong>${bottom.label}</strong> ${bottom.delta >= 0 ? `cresce ${fmt.pctSign(bottom.delta, 0)}, ainda que de forma mais discreta` : `recua <span class="neg">${fmt.pctSign(bottom.delta, 0)}</span> e merece atenção`}.`;
+  } else {
+    insight = `<strong>${top.label}</strong> leads new bookings at <span class="${top.delta >= 0 ? 'pos' : 'neg'}">${fmt.pctSign(top.delta, 0)}</span> vs 2025. <strong>${bottom.label}</strong> ${bottom.delta >= 0 ? `is up ${fmt.pctSign(bottom.delta, 0)}, though more modestly` : `is down <span class="neg">${fmt.pctSign(bottom.delta, 0)}</span> and warrants attention`}.`;
+  }
+  document.getElementById('mkt-insight').innerHTML = insight;
+}
+
+/* ───────── 13. CHARTS ───────── */
+const charts = { revenue: null, pickup: null, drill: null };
+
+function chartCommonOptions() {
+  const css = getComputedStyle(document.documentElement);
+  const ink2 = css.getPropertyValue('--ink-2').trim();
+  const ink3 = css.getPropertyValue('--ink-3').trim();
+  const line = css.getPropertyValue('--line').trim();
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 800, easing: 'easeOutCubic' },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(43,32,16,0.94)',
+        titleFont: { family: "'Optima Nova', 'Optima', Marcellus, serif", weight: '300', size: 13, style: 'italic' },
+        titleColor: '#F4EEDB',
+        titleMarginBottom: 6,
+        bodyFont: { family: "'Gill Sans Nova', 'Gill Sans', Seravek, Jost, sans-serif", size: 12, weight: '400' },
+        bodyColor: '#F4EEDB',
+        padding: 12,
+        cornerRadius: 2,
+        displayColors: false,
+        boxPadding: 4,
+      },
+    },
+    scales: {
+      x: {
+        border: { display: false },
+        grid: { display: false },
+        ticks: {
+          color: ink3,
+          font: { family: "'Gill Sans Nova', 'Gill Sans', Seravek, Jost, sans-serif", size: 10, weight: '400' },
+          maxRotation: 0,
+          autoSkipPadding: 12,
+        },
+      },
+      y: {
+        border: { display: false },
+        grid: { color: line, drawTicks: false },
+        ticks: {
+          color: ink3,
+          font: { family: "'Gill Sans Nova', 'Gill Sans', Seravek, Jost, sans-serif", size: 10, weight: '400' },
+          padding: 8,
+          callback: (v) => fmt.moneyShort(v),
+        },
+      },
+    },
+  };
+}
+
+function renderRevenueChart() {
+  const ctx = document.getElementById('chart-revenue');
+  if (!ctx) return;
+  // 30 days ending today + STLY overlay
+  const labels = [];
+  const now = [];
+  const prev = [];
+  for (let i = 29; i >= 0; i--) {
+    const iso = addDays(CFG.todayISO, -i);
+    labels.push(fmt.dateShort(iso));
+    now.push(dayData(iso).revenue);
+    const pIso = addDays(stlyAnchor(CFG.todayISO), -i);
+    prev.push(dayData(pIso).revenue);
+  }
+
+  if (charts.revenue) charts.revenue.destroy();
+  const css = getComputedStyle(document.documentElement);
+  const moss = css.getPropertyValue('--moss').trim();
+  const ink3 = css.getPropertyValue('--ink-3').trim();
+
+  charts.revenue = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: state.lang === 'pt' ? '2025' : '2025',
+          data: prev,
+          borderColor: ink3,
+          borderWidth: 1,
+          borderDash: [3, 4],
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          tension: 0.28,
+          fill: false,
+        },
+        {
+          label: state.lang === 'pt' ? '2026' : '2026',
+          data: now,
+          borderColor: moss,
+          borderWidth: 1.75,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          pointHoverBackgroundColor: moss,
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2,
+          tension: 0.28,
+          fill: {
+            target: 'origin',
+            above: hexToRGBA(moss, 0.07),
+          },
+        },
+      ],
+    },
+    options: {
+      ...chartCommonOptions(),
+      plugins: {
+        ...chartCommonOptions().plugins,
+        tooltip: {
+          ...chartCommonOptions().plugins.tooltip,
+          callbacks: {
+            title: (items) => items[0]?.label ?? '',
+            label: (ctx) => {
+              const year = ctx.dataset.label;
+              return `${year}  ${fmt.moneyShort(ctx.parsed.y)}`;
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Insight
+  const last7Now = now.slice(-7).reduce((s,v) => s + v, 0);
+  const last7Prev = prev.slice(-7).reduce((s,v) => s + v, 0);
+  const delta = pct(last7Now, last7Prev);
+  let insight;
+  if (state.lang === 'pt') {
+    insight = `Receita dos últimos sete dias em <strong>${fmt.moneyShort(last7Now)}</strong>, ${delta >= 0 ? `<span class="pos">${fmt.pctSign(delta, 0)}</span> acima` : `<span class="neg">${fmt.pctSign(delta, 0)}</span> abaixo`} da semana homóloga de 2025.`;
+  } else {
+    insight = `Revenue over the past seven days at <strong>${fmt.moneyShort(last7Now)}</strong>, ${delta >= 0 ? `<span class="pos">${fmt.pctSign(delta, 0)}</span> above` : `<span class="neg">${fmt.pctSign(delta, 0)}</span> below`} the same week of 2025.`;
+  }
+  document.getElementById('rev-insight').innerHTML = insight;
+}
+
+function renderPickupChart() {
+  const ctx = document.getElementById('chart-pickup');
+  if (!ctx) return;
+  const labels = [];
+  const actuals = [];
+  const fcasts = [];
+  // 30 days back, daily roomsSold actual vs forecast
+  for (let i = 29; i >= 0; i--) {
+    const iso = addDays(CFG.todayISO, -i);
+    const d = dayData(iso);
+    labels.push(fmt.dateShort(iso));
+    actuals.push(d.roomsSold);
+    fcasts.push(d.fcast ? Math.round(d.fcast / d.adr) : null);
+  }
+
+  if (charts.pickup) charts.pickup.destroy();
+  const css = getComputedStyle(document.documentElement);
+  const moss = css.getPropertyValue('--moss').trim();
+  const gold = css.getPropertyValue('--gold').trim();
+  const ink3 = css.getPropertyValue('--ink-3').trim();
+
+  charts.pickup = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: state.lang === 'pt' ? 'Reservado' : 'Booked',
+          data: actuals,
+          backgroundColor: hexToRGBA(moss, 0.78),
+          borderRadius: 1,
+          barPercentage: 0.55,
+          categoryPercentage: 0.85,
+        },
+        {
+          label: state.lang === 'pt' ? 'Forecast' : 'Forecast',
+          data: fcasts,
+          type: 'line',
+          borderColor: gold,
+          borderWidth: 1.4,
+          borderDash: [4, 3],
+          pointRadius: 0,
+          tension: 0.25,
+        },
+      ],
+    },
+    options: {
+      ...chartCommonOptions(),
+      scales: {
+        ...chartCommonOptions().scales,
+        y: {
+          ...chartCommonOptions().scales.y,
+          ticks: {
+            ...chartCommonOptions().scales.y.ticks,
+            callback: (v) => fmt.int(v),
+          },
+        },
+      },
+      plugins: {
+        ...chartCommonOptions().plugins,
+        tooltip: {
+          ...chartCommonOptions().plugins.tooltip,
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}  ${fmt.int(ctx.parsed.y)} ${state.lang === 'pt' ? 'quartos' : 'rooms'}`,
+          },
+        },
+      },
+    },
+  });
+
+  const last7Actual = actuals.slice(-7).reduce((s,v) => s + v, 0);
+  const last7Fcast = fcasts.slice(-7).filter(v => v !== null).reduce((s,v) => s + v, 0);
+  const delta = pct(last7Actual, last7Fcast);
+  let insight;
+  if (state.lang === 'pt') {
+    insight = `Nos últimos sete dias, <strong>${fmt.int(last7Actual)}</strong> quartos foram reservados, ${delta >= 0 ? `<span class="pos">${fmt.pctSign(delta, 0)}</span> acima da previsão` : `<span class="neg">${fmt.pctSign(delta, 0)}</span> abaixo da previsão`}.`;
+  } else {
+    insight = `Over the past seven days, <strong>${fmt.int(last7Actual)}</strong> rooms were booked, ${delta >= 0 ? `<span class="pos">${fmt.pctSign(delta, 0)}</span> above forecast` : `<span class="neg">${fmt.pctSign(delta, 0)}</span> below forecast`}.`;
+  }
+  document.getElementById('pickup-insight').innerHTML = insight;
+}
+
+function hexToRGBA(hex, a) {
+  hex = hex.replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const r = parseInt(hex.slice(0,2), 16);
+  const g = parseInt(hex.slice(2,4), 16);
+  const b = parseInt(hex.slice(4,6), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ───────── 14. DRILL-DOWN ───────── */
+function openDrill(kpiKey) {
+  const k = computeKPIs()[kpiKey];
+  if (!k) return;
+  const title = t(k.labelKey);
+  const eyebrow = state.lang === 'pt' ? `Detalhe, ${CFG.resort}` : `Detail, ${CFG.resort}`;
+
+  document.getElementById('drill-eyebrow').textContent = eyebrow;
+  document.getElementById('drill-title').innerHTML = state.lang === 'pt'
+    ? `${title}, <em>com detalhe</em>`
+    : `${title}, <em>in detail</em>`;
+
+  // Body
+  const body = document.getElementById('drill-body');
+
+  // Stats: today, 7d, 30d
+  const series = (n) => {
+    let total = 0, prev = 0;
+    if (kpiKey === 'occ' || kpiKey === 'otb') {
+      const arr = [], parr = [];
+      for (let i = 0; i < n; i++) {
+        arr.push(dayData(addDays(CFG.todayISO, -i)).occ);
+        parr.push(dayData(addDays(stlyAnchor(CFG.todayISO), -i)).occ);
+      }
+      return { now: arr.reduce((s,v) => s + v, 0) / n, prev: parr.reduce((s,v) => s + v, 0) / n, fmt: 'pct' };
+    }
+    if (kpiKey === 'adr' || kpiKey === 'revpar') {
+      const arr = [], parr = [];
+      for (let i = 0; i < n; i++) {
+        arr.push(dayData(addDays(CFG.todayISO, -i))[kpiKey]);
+        parr.push(dayData(addDays(stlyAnchor(CFG.todayISO), -i))[kpiKey]);
+      }
+      return { now: arr.reduce((s,v) => s + v, 0) / n, prev: parr.reduce((s,v) => s + v, 0) / n, fmt: 'money' };
+    }
+    // revenue / pickup
+    for (let i = 0; i < n; i++) {
+      total += dayData(addDays(CFG.todayISO, -i)).revenue;
+      prev  += dayData(addDays(stlyAnchor(CFG.todayISO), -i)).revenue;
+    }
+    return { now: total, prev, fmt: 'money' };
+  };
+
+  const stat7 = series(7);
+  const stat30 = series(30);
+  const todayD = dayData(CFG.todayISO);
+  const stlyD = dayData(stlyAnchor(CFG.todayISO));
+
+  const renderStat = (label, now, prev, fmtKind) => {
+    const d = pct(now, prev);
+    const klass = Math.abs(d) < 0.005 ? 'flat' : (d >= 0 ? 'pos' : 'neg');
+    const valFmt = fmtKind === 'pct' ? fmt.pct(now, 1) : (fmtKind === 'money' ? fmt.moneyShort(now) : fmt.int(now));
+    const prevFmt = fmtKind === 'pct' ? fmt.pct(prev, 1) : (fmtKind === 'money' ? fmt.moneyShort(prev) : fmt.int(prev));
+    return `
+      <div class="drill-stat">
+        <div class="label">${label}</div>
+        <div class="value tabular">${valFmt}</div>
+        <div class="sub"><span class="${klass}" style="color: var(--${klass === 'pos' ? 'pos' : klass === 'neg' ? 'neg' : 'ink-3'})">${fmt.pctSign(d, 1)}</span> ${state.lang === 'pt' ? 'vs. 2025' : 'vs. 2025'} (${prevFmt})</div>
+      </div>
+    `;
+  };
+
+  let kindSingle = (kpiKey === 'occ' || kpiKey === 'otb') ? 'pct' : (kpiKey === 'pickup' ? 'int' : 'money');
+  let todayValue, prevValue;
+  if (kpiKey === 'occ' || kpiKey === 'otb') { todayValue = todayD.occ; prevValue = stlyD.occ; }
+  else if (kpiKey === 'adr')   { todayValue = todayD.adr; prevValue = stlyD.adr; }
+  else if (kpiKey === 'revpar'){ todayValue = todayD.revpar; prevValue = stlyD.revpar; }
+  else if (kpiKey === 'revenue'){ todayValue = todayD.revenue; prevValue = stlyD.revenue; }
+  else if (kpiKey === 'pickup'){ todayValue = k.value; prevValue = todayValue / (1 + k.yoy); }
+
+  body.innerHTML = `
+    <div class="drill-stat-row">
+      ${renderStat(t('today'), todayValue, prevValue, kindSingle)}
+      ${renderStat(state.lang === 'pt' ? 'Últimos 7 dias' : 'Last 7 days', stat7.now, stat7.prev, stat7.fmt)}
+      ${renderStat(state.lang === 'pt' ? 'Últimos 30 dias' : 'Last 30 days', stat30.now, stat30.prev, stat30.fmt)}
+    </div>
+
+    <div class="drill-section">
+      <div class="drill-section-title">
+        <span>${t('drill.last3y')}</span>
+        <span style="font-size: 0.625rem; color: var(--ink-3);">${state.lang === 'pt' ? 'Médias mensais' : 'Monthly averages'}</span>
+      </div>
+      <div class="drill-chart-wrap"><canvas id="drill-chart"></canvas></div>
+    </div>
+
+    <div class="drill-section">
+      <div class="drill-section-title">
+        <span>${t('drill.breakdown')} · ${t('drill.byChannel')}</span>
+      </div>
+      <div class="drill-breakdown" id="drill-breakdown"></div>
+    </div>
+
+    <div class="drill-section">
+      <div class="drill-section-title">
+        <span>${t('drill.actions')}</span>
+      </div>
+      <div class="drill-action">${suggestedAction(kpiKey, k)}</div>
+    </div>
+  `;
+
+  // Channel breakdown for the current value (today's channel mix scaled to KPI)
+  const totalToday = todayD.roomsSold;
+  const channelRows = CHANNELS.map(ch => ({
+    label: ch.label[state.lang],
+    sub: ch.sub[state.lang],
+    share: todayD.channelShare[ch.code],
+    rooms: todayD.channelShare[ch.code] * totalToday,
+  })).sort((a,b) => b.share - a.share);
+  const maxCh = channelRows[0].share;
+  document.getElementById('drill-breakdown').innerHTML = channelRows.map((r, i) => `
+    <div class="seg-row">
+      <div class="seg-name">${r.label}<span class="sub">${r.sub}</span></div>
+      <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxCh * 100).toFixed(1)}%; background: ${['var(--tierra)','var(--gold)','var(--terra)','var(--sky)','var(--ink-3)','var(--ink-3)'][i]}"></div></div>
+      <div class="seg-val">${fmt.pct(r.share, 0)}<span class="pct">${fmt.int(r.rooms)} ${state.lang === 'pt' ? 'quartos' : 'rooms'}</span></div>
+    </div>
+  `).join('');
+
+  // 3-year monthly average chart
+  setTimeout(() => render3yChart(kpiKey), 60);
+
+  // Open
+  document.getElementById('drill').classList.add('is-open');
+  document.getElementById('drill-overlay').classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function suggestedAction(kpiKey, k) {
+  const L = state.lang;
+  const delta = k.yoy;
+  if (L === 'pt') {
+    if (kpiKey === 'occ') {
+      if (delta > 0.05) return `A ocupação acima de 2025 sugere que <strong>existe margem para subir a tarifa</strong> sem perder volume. Considere testar um aumento de €10 a €15 na tarifa média para as próximas duas semanas.`;
+      if (delta < -0.03) return `A ocupação abaixo de 2025 num período comparável merece atenção. <strong>Reveja os canais</strong>, onde estão a faltar reservas? Plataformas online ou canal direto? Pode justificar-se uma campanha pontual.`;
+      return `Ocupação alinhada com 2025. Mantenha o ritmo atual e <strong>acompanhe de perto o ritmo de reservas das próximas duas semanas</strong>.`;
+    }
+    if (kpiKey === 'adr') {
+      if (delta > 0.04) return `Tarifa média a crescer face a 2025, sinal de que <strong>está a vender-se valor e não preço</strong>. Verifique se o peso de quartos premium aumentou e proteja essa narrativa.`;
+      if (delta < -0.03) return `Tarifa média abaixo de 2025. <strong>Confirme se há descontos a circular</strong> via operadores ou plataformas online, ou se a distribuição está mais carregada de tarifas promocionais.`;
+      return `Tarifa média estável. Considere <strong>ofertas com condições específicas</strong> para captar quem reserva com antecedência, sem prejudicar a tarifa pública.`;
+    }
+    if (kpiKey === 'revenue') {
+      return `${delta >= 0 ? 'Receita acima' : 'Receita abaixo'} de 2025. Avalie o peso da <strong>restauração e dos extras</strong> no ticket médio, pois pode existir potencial não capturado em receitas paralelas.`;
+    }
+    if (kpiKey === 'pickup') {
+      if (delta > 0.05) return `Ritmo de reservas forte. <strong>Reserve inventário</strong> para os fins de semana de pico, se ainda não o fez, para evitar fechos de última hora.`;
+      if (delta < -0.05) return `Ritmo de reservas fraco para os próximos sete dias. <strong>Considere uma ação rápida</strong>, como um email para a base de clientes, uma campanha em redes sociais pagas com criativos de últimos disponíveis, ou abertura tática na Booking.`;
+      return `Ritmo de reservas dentro do esperado. Mantenha a previsão sob vigilância.`;
+    }
+    if (kpiKey === 'otb') {
+      if (delta > 0.05) return `Reservas confirmadas sólidas para os próximos 30 dias. <strong>Avalie a gestão tarifária</strong> nos picos para maximizar a tarifa média, há margem para travar canais mais caros.`;
+      if (delta < -0.05) return `Reservas confirmadas abaixo de 2025 para os próximos 30 dias. <strong>Reveja o plano de campanhas pagas</strong> para os próximos 14 dias e considere abrir tarifas promocionais em mercados com pior desempenho.`;
+      return `Reservas confirmadas alinhadas com 2025. Mantenha a disciplina nas tarifas.`;
+    }
+    return `Continue a acompanhar a evolução deste indicador e cruze com canais e mercados na próxima vista.`;
+  }
+  if (kpiKey === 'occ') {
+    if (delta > 0.05) return `Occupancy ahead of 2025 suggests <strong>room to raise the rate</strong> without losing volume. Consider testing an increase of €10 to €15 on the average rate for the next two weeks.`;
+    if (delta < -0.03) return `Occupancy below 2025 for a comparable period warrants attention. <strong>Review the channels</strong>, where are bookings missing? Online platforms or direct? A targeted campaign may be justified.`;
+    return `Occupancy in line with 2025. Hold the current rhythm and <strong>watch the booking pace closely over the next two weeks</strong>.`;
+  }
+  if (kpiKey === 'adr') {
+    if (delta > 0.04) return `Average rate growing vs 2025, a sign that <strong>value, not price, is what's selling</strong>. Check whether the premium-room mix has increased and protect that narrative.`;
+    if (delta < -0.03) return `Average rate slipping vs 2025. <strong>Check for active discounts</strong> via tour operators or online platforms, or whether the mix has tilted toward promotional rates.`;
+    return `Average rate steady. Consider <strong>offers with specific conditions</strong> to capture guests booking in advance, without undermining the public rate.`;
+  }
+  if (kpiKey === 'revenue') return `${delta >= 0 ? 'Revenue ahead' : 'Revenue behind'} of 2025. Look at the contribution of <strong>food, beverage and extras</strong> to the average ticket, as there may be uncaptured potential in side revenue.`;
+  if (kpiKey === 'pickup') {
+    if (delta > 0.05) return `Booking pace is strong. <strong>Reserve inventory</strong> for peak weekends if you haven't already, to avoid last-minute closures.`;
+    if (delta < -0.05) return `Booking pace is weak over the next seven days. <strong>Consider a quick action</strong>, such as an email to your customer base, a paid social campaign with last-available creatives, or a tactical opening on Booking.`;
+    return `Booking pace within the expected range. Keep the forecast under watch.`;
+  }
+  if (kpiKey === 'otb') {
+    if (delta > 0.05) return `Confirmed bookings are solid for the next 30 days. <strong>Review rate management</strong> on peaks to maximise the average rate, there's room to throttle more expensive channels.`;
+    if (delta < -0.05) return `Confirmed bookings below 2025 for the next 30 days. <strong>Review the paid campaigns plan</strong> for the next 14 days and consider opening promotional rates in underperforming markets.`;
+    return `Confirmed bookings in line with 2025. Keep rate discipline.`;
+  }
+  return `Keep monitoring this indicator and cross-reference with channels and markets in the next view.`;
+}
+
+function render3yChart(kpiKey) {
+  const ctx = document.getElementById('drill-chart');
+  if (!ctx) return;
+
+  // Build monthly averages for last 36 months
+  const months = [];
+  const monthLabel = new Date(CFG.todayISO);
+  for (let i = 35; i >= 0; i--) {
+    const d = new Date(monthLabel);
+    d.setMonth(d.getMonth() - i);
+    const y = d.getFullYear(), m = d.getMonth();
+    const first = new Date(y, m, 1);
+    const last  = new Date(y, m + 1, 0);
+    const isoFirst = first.toISOString().slice(0,10);
+    const isoLast  = last.toISOString().slice(0,10);
+    const days = [];
+    let cur = isoFirst;
+    while (cur <= isoLast && cur <= CFG.todayISO) {
+      const dd = dayData(cur);
+      if (dd) days.push(dd);
+      cur = addDays(cur, 1);
+    }
+    if (!days.length) { months.push({ label: I18N[state.lang].months[m].slice(0,3), y: y, val: null }); continue; }
+    let val;
+    if (kpiKey === 'occ' || kpiKey === 'otb') val = days.reduce((s,x) => s + x.occ, 0) / days.length;
+    else if (kpiKey === 'adr') val = days.reduce((s,x) => s + x.adr, 0) / days.length;
+    else if (kpiKey === 'revpar') val = days.reduce((s,x) => s + x.revpar, 0) / days.length;
+    else val = days.reduce((s,x) => s + x.revenue, 0); // revenue / pickup sum
+    months.push({ label: I18N[state.lang].months[m].slice(0,3), y, val });
+  }
+
+  if (charts.drill) charts.drill.destroy();
+  const css = getComputedStyle(document.documentElement);
+  const moss = css.getPropertyValue('--moss').trim();
+  const ink3 = css.getPropertyValue('--ink-3').trim();
+  const line = css.getPropertyValue('--line').trim();
+
+  // Color the latest year stronger
+  const labels = months.map(m => m.label);
+  const data = months.map(m => m.val);
+  const colors = months.map(m => m.y === 2026 ? moss : (m.y === 2025 ? hexToRGBA(moss, 0.55) : hexToRGBA(moss, 0.28)));
+
+  charts.drill = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderRadius: 1,
+        barPercentage: 0.78,
+        categoryPercentage: 0.85,
+      }],
+    },
+    options: {
+      ...chartCommonOptions(),
+      scales: {
+        x: {
+          ...chartCommonOptions().scales.x,
+          ticks: {
+            ...chartCommonOptions().scales.x.ticks,
+            callback: function(val, i) {
+              const m = months[i];
+              if (i === 0 || m.label === I18N[state.lang].months[0].slice(0,3)) return m.y;
+              return '';
+            },
+          },
+        },
+        y: {
+          ...chartCommonOptions().scales.y,
+          ticks: {
+            ...chartCommonOptions().scales.y.ticks,
+            callback: (v) => {
+              if (kpiKey === 'occ' || kpiKey === 'otb') return (v * 100).toFixed(0) + '%';
+              if (kpiKey === 'adr' || kpiKey === 'revpar') return fmt.moneyShort(v);
+              return fmt.moneyShort(v);
+            },
+          },
+        },
+      },
+      plugins: {
+        ...chartCommonOptions().plugins,
+        tooltip: {
+          ...chartCommonOptions().plugins.tooltip,
+          callbacks: {
+            title: (items) => {
+              const i = items[0].dataIndex;
+              return `${months[i].label} ${months[i].y}`;
+            },
+            label: (ctx) => {
+              const v = ctx.parsed.y;
+              if (kpiKey === 'occ' || kpiKey === 'otb') return fmt.pct(v, 1);
+              if (kpiKey === 'adr' || kpiKey === 'revpar') return fmt.money(v, 0);
+              return fmt.moneyShort(v);
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function closeDrill() {
+  document.getElementById('drill').classList.remove('is-open');
+  document.getElementById('drill-overlay').classList.remove('is-open');
+  document.body.style.overflow = '';
+  if (charts.drill) { charts.drill.destroy(); charts.drill = null; }
+}
+
+/* ───────── 15. SECTION META & RANGE ───────── */
+function renderSectionMeta() {
+  const k = computeKPIs();
+  const txt = state.lang === 'pt'
+    ? `Atualizado às ${formatTimeNow()}`
+    : `Updated at ${formatTimeNow()}`;
+  document.getElementById('kpi-meta').textContent = txt;
+}
+function formatTimeNow() {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return `${hh}:${mm}`;
+}
+
+/* ───────── 16. VIEW SWITCHING ───────── */
+function showView(name) {
+  state.view = name;
+  document.querySelectorAll('.view').forEach(v => {
+    v.hidden = (v.dataset.view !== name);
+  });
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('is-active', b.dataset.view === name);
+  });
+  // Render dynamic views on activation
+  if (name === 'week')    renderWeekView();
+  if (name === 'month')   renderMonthView();
+  if (name === 'pace')    renderPaceView();
+  if (name === 'sources') renderSourcesView();
+  savePrefs();
+}
+
+/* ───────── 17. EVENT BINDINGS ───────── */
+function wireEvents() {
+  // Nav
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => showView(btn.dataset.view));
+  });
+
+  // Range pills
+  document.querySelectorAll('#range-group .tool-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#range-group .tool-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      state.range = btn.dataset.range;
+      // For Phase 1 the range mostly affects analysis text/insights; charts already show 30d. We can extend later.
+    });
+  });
+
+  // YoY toggle (visual only for now)
+  document.getElementById('yoy-toggle').addEventListener('click', (e) => {
+    state.yoy = !state.yoy;
+    e.currentTarget.style.opacity = state.yoy ? 1 : 0.55;
+    savePrefs();
+  });
+
+  // Language toggle
+  document.getElementById('toggle-lang').addEventListener('click', () => {
+    state.lang = state.lang === 'pt' ? 'en' : 'pt';
+    savePrefs();
+    renderAll();
+  });
+
+  // Theme toggle
+  document.getElementById('toggle-theme').addEventListener('click', () => {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    document.body.dataset.theme = state.theme;
+    savePrefs();
+    renderAll();
+  });
+
+  // Drill close
+  document.getElementById('drill-close').addEventListener('click', closeDrill);
+  document.getElementById('drill-overlay').addEventListener('click', closeDrill);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDrill();
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE IIa — Week, Month, Pace, Sources
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ───────── Helpers shared across views ───────── */
+function weekdayShort(iso) {
+  return I18N[state.lang].weekdays[new Date(iso).getDay()].slice(0,3);
+}
+function isoToDayMonth(iso) {
+  const d = new Date(iso);
+  const m = I18N[state.lang].months[d.getMonth()].slice(0,3);
+  return state.lang === 'pt' ? `${d.getDate()} ${m}` : `${d.getDate()} ${cap(m)}`;
+}
+
+/* ───────── Analyzers ───────── */
+function aggregateRange(startISO, endISO) {
+  const days = [];
+  let cur = startISO;
+  while (cur <= endISO) { days.push(dayData(cur)); cur = addDays(cur, 1); }
+  return aggregate(days);
+}
+
+function weekAnalysis() {
+  const anchor = CFG.todayISO;
+  const last7Start = addDays(anchor, -6);
+  const prior7Start = addDays(anchor, -13);
+  const prior7End = addDays(anchor, -7);
+  const stlyEnd = stlyAnchor(anchor);
+  const stlyStart = addDays(stlyEnd, -6);
+
+  const last7 = aggregateRange(last7Start, anchor);
+  const prior7 = aggregateRange(prior7Start, prior7End);
+  const stly7 = aggregateRange(stlyStart, stlyEnd);
+
+  // Day-by-day for the strip
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const iso = addDays(anchor, -i);
+    days.push({ iso, ...dayData(iso) });
+  }
+  const occs = days.map(d => d.occ);
+  const maxOcc = Math.max(...occs);
+  const minOcc = Math.min(...occs);
+  const bestDay = days.find(d => d.occ === maxOcc);
+  const worstDay = days.find(d => d.occ === minOcc);
+
+  return { last7, prior7, stly7, days, bestDay, worstDay,
+           start: last7Start, end: anchor };
+}
+
+function monthAnalysis() {
+  const anchor = CFG.todayISO;
+  const d = new Date(anchor);
+  const monthStart = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10);
+  const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0,10);
+  const monthEndISO = monthEnd;
+  const dayOfMonth = d.getDate();
+  const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+
+  const mtd = aggregateRange(monthStart, anchor);
+
+  // Last year same month, same period (1..dayOfMonth)
+  const lyStart = `${d.getFullYear() - 1}-${String(d.getMonth() + 1).padStart(2,'0')}-01`;
+  const lyEnd = `${d.getFullYear() - 1}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(dayOfMonth).padStart(2,'0')}`;
+  const lyMtd = aggregateRange(lyStart, lyEnd);
+
+  // Full month last year for reference
+  const lyMonthEnd = `${d.getFullYear() - 1}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
+  const lyFull = aggregateRange(lyStart, lyMonthEnd);
+
+  // Project month-end by extrapolating current pace
+  const projectedRevenue = (mtd.revenue / dayOfMonth) * daysInMonth;
+
+  // Budget for full month (sum of all 2026 days' budget in this month)
+  let budget = 0;
+  let cur = monthStart;
+  while (cur <= monthEndISO) {
+    const dd = dayData(cur);
+    if (dd && dd.budget) budget += dd.budget;
+    cur = addDays(cur, 1);
+  }
+
+  // MTD budget (1..dayOfMonth)
+  let budgetMtd = 0;
+  cur = monthStart;
+  while (cur <= anchor) {
+    const dd = dayData(cur);
+    if (dd && dd.budget) budgetMtd += dd.budget;
+    cur = addDays(cur, 1);
+  }
+
+  // Daily series for chart
+  const series = [];
+  let cumActual = 0, cumBudget = 0;
+  cur = monthStart;
+  while (cur <= monthEndISO) {
+    const dd = dayData(cur);
+    const isPast = cur <= anchor;
+    cumActual += isPast ? dd.revenue : 0;
+    cumBudget += dd.budget || 0;
+    series.push({
+      iso: cur,
+      day: new Date(cur).getDate(),
+      actual: isPast ? cumActual : null,
+      forecast: !isPast ? cumActual + (cumActual / dayOfMonth) * (new Date(cur).getDate() - dayOfMonth) : null,
+      budget: cumBudget,
+      isPast,
+    });
+    cur = addDays(cur, 1);
+  }
+
+  return {
+    monthStart, monthEnd: monthEndISO,
+    dayOfMonth, daysInMonth,
+    mtd, lyMtd, lyFull,
+    projectedRevenue,
+    budget, budgetMtd,
+    series,
+  };
+}
+
+function paceAnalysis() {
+  const horizons = [7, 14, 30, 60, 90];
+  const result = horizons.map(h => {
+    const days = [];
+    const lyDays = [];
+    for (let i = 1; i <= h; i++) {
+      days.push(dayData(addDays(CFG.todayISO, i)));
+      lyDays.push(dayData(addDays(stlyAnchor(CFG.todayISO), i)));
+    }
+    const agg = aggregate(days);
+    const lyAgg = aggregate(lyDays);
+    return {
+      h,
+      occ: agg.occ,
+      revenue: agg.revenue,
+      lyOcc: lyAgg.occ,
+      lyRevenue: lyAgg.revenue,
+      deltaOcc: pct(agg.occ, lyAgg.occ),
+      deltaRev: pct(agg.revenue, lyAgg.revenue),
+    };
+  });
+
+  // Pickup curve: bookings per future day for next 90 days (rooms sold)
+  const curve = [];
+  for (let i = 1; i <= 90; i++) {
+    const d = dayData(addDays(CFG.todayISO, i));
+    const ly = dayData(addDays(stlyAnchor(CFG.todayISO), i));
+    curve.push({
+      iso: d.iso,
+      day: i,
+      otb: d.roomsSold,
+      ly: ly.roomsSold,
+      budget: d.budget ? Math.round(d.budget / d.adr) : null,
+    });
+  }
+
+  return { horizons: result, curve };
+}
+
+/* ───────── Story builders ───────── */
+function buildWeekStory() {
+  const w = weekAnalysis();
+  const L = state.lang;
+  const deltaRev = pct(w.last7.revenue, w.prior7.revenue);
+  const deltaRevYoy = pct(w.last7.revenue, w.stly7.revenue);
+  const deltaOccYoy = w.last7.occ - w.stly7.occ;
+
+  let headline, body;
+  if (L === 'pt') {
+    if (deltaRevYoy > 0.08) headline = `A semana fechou <em>bem acima do ano passado</em>, com a receita a crescer.`;
+    else if (deltaRevYoy < -0.05) headline = `A semana ficou <em>aquém de 2025</em>, com a receita a recuar.`;
+    else if (deltaRev > 0.05) headline = `Semana mais forte do que a anterior, com sinais consistentes de retoma.`;
+    else headline = `Uma semana <em>dentro do esperado</em>, com nuances que vale a pena ler.`;
+
+    const occStr = fmt.pct(w.last7.occ, 0);
+    const adrStr = fmt.money(w.last7.adr, 0);
+    const revStr = fmt.moneyShort(w.last7.revenue);
+
+    const part1 = `Nos últimos sete dias, o resort registou <strong>${revStr}</strong> em receita de quartos, com ocupação média de <strong>${occStr}</strong> e tarifa média nos <strong>${adrStr}</strong>.`;
+    const part2 = ` Face a 2025, ${deltaRevYoy >= 0 ? `a receita está <span class="pos">${fmt.pctSign(deltaRevYoy, 0)}</span> acima` : `a receita está <span class="neg">${fmt.pctSign(deltaRevYoy, 0)}</span> abaixo`} e a ocupação ${deltaOccYoy >= 0 ? `<span class="pos">+${(deltaOccYoy * 100).toFixed(1).replace('.',',')} pontos</span> mais alta` : `<span class="neg">${(deltaOccYoy * 100).toFixed(1).replace('.',',')} pontos</span> mais baixa`}.`;
+    const part3 = ` O melhor dia foi ${I18N.pt.weekdays[new Date(w.bestDay.iso).getDay()]}, com ${fmt.pct(w.bestDay.occ, 0)} de ocupação; o dia mais discreto, ${I18N.pt.weekdays[new Date(w.worstDay.iso).getDay()]}, ficou nos ${fmt.pct(w.worstDay.occ, 0)}.`;
+    body = part1 + part2 + part3;
+  } else {
+    if (deltaRevYoy > 0.08) headline = `The week closed <em>well ahead of last year</em>, with revenue growing.`;
+    else if (deltaRevYoy < -0.05) headline = `The week fell <em>short of 2025</em>, with revenue retreating.`;
+    else if (deltaRev > 0.05) headline = `A stronger week than the prior one, with consistent signs of recovery.`;
+    else headline = `A week <em>within the expected range</em>, with nuances worth reading.`;
+
+    const occStr = fmt.pct(w.last7.occ, 0);
+    const adrStr = fmt.money(w.last7.adr, 0);
+    const revStr = fmt.moneyShort(w.last7.revenue);
+
+    const part1 = `Over the past seven days, the resort posted <strong>${revStr}</strong> in room revenue, with average occupancy of <strong>${occStr}</strong> and average rate at <strong>${adrStr}</strong>.`;
+    const part2 = ` Versus 2025, ${deltaRevYoy >= 0 ? `revenue is <span class="pos">${fmt.pctSign(deltaRevYoy, 0)}</span> above` : `revenue is <span class="neg">${fmt.pctSign(deltaRevYoy, 0)}</span> below`} and occupancy is ${deltaOccYoy >= 0 ? `<span class="pos">+${(deltaOccYoy * 100).toFixed(1)} points</span> higher` : `<span class="neg">${(deltaOccYoy * 100).toFixed(1)} points</span> lower`}.`;
+    const part3 = ` The best day was ${I18N.en.weekdays[new Date(w.bestDay.iso).getDay()]}, at ${fmt.pct(w.bestDay.occ, 0)} occupancy; the quietest, ${I18N.en.weekdays[new Date(w.worstDay.iso).getDay()]}, settled at ${fmt.pct(w.worstDay.occ, 0)}.`;
+    body = part1 + part2 + part3;
+  }
+
+  const foot = [
+    { label: L === 'pt' ? 'Receita, 7 dias' : 'Revenue, 7 days', value: fmt.moneyShort(w.last7.revenue), klass: deltaRevYoy >= 0 ? 'pos' : 'neg' },
+    { label: L === 'pt' ? 'Ocupação média' : 'Avg occupancy',    value: fmt.pct(w.last7.occ, 0),         klass: deltaOccYoy >= 0 ? 'pos' : 'neg' },
+    { label: L === 'pt' ? 'Tarifa média'   : 'Avg rate',         value: fmt.money(w.last7.adr, 0),       klass: w.last7.adr >= w.stly7.adr ? 'pos' : 'neg' },
+    { label: L === 'pt' ? 'Quartos vendidos': 'Rooms sold',      value: fmt.int(w.last7.roomsSold),      klass: w.last7.roomsSold >= w.stly7.roomsSold ? 'pos' : 'neg' },
+  ];
+
+  return { headline, body, foot, w };
+}
+
+function buildMonthStory() {
+  const m = monthAnalysis();
+  const L = state.lang;
+  const monthName = I18N[L].months[new Date(CFG.todayISO).getMonth()];
+  const deltaYoy = pct(m.mtd.revenue, m.lyMtd.revenue);
+  const deltaBudget = pct(m.mtd.revenue, m.budgetMtd);
+  const projectedYoy = pct(m.projectedRevenue, m.lyFull.revenue);
+
+  let headline, body;
+  if (L === 'pt') {
+    if (deltaBudget > 0.05) headline = `${cap(monthName)} corre <em>acima do orçamento</em>, com a projeção a confirmar o ritmo.`;
+    else if (deltaBudget < -0.05) headline = `${cap(monthName)} está <em>abaixo do orçamento</em>, vale a pena acelerar até ao fim do mês.`;
+    else if (deltaYoy > 0.05) headline = `${cap(monthName)} bate o ano passado, com receita acumulada superior.`;
+    else headline = `${cap(monthName)} segue um curso <em>dentro do previsto</em>, com nuances que importam.`;
+
+    const part1 = `Até hoje, dia ${m.dayOfMonth} de ${monthName}, a receita acumulada do mês está em <strong>${fmt.moneyShort(m.mtd.revenue)}</strong>, com ocupação média de <strong>${fmt.pct(m.mtd.occ, 0)}</strong>.`;
+    const part2 = ` Face ao mesmo período de 2025, ${deltaYoy >= 0 ? `estamos <span class="pos">${fmt.pctSign(deltaYoy, 0)}</span> acima` : `estamos <span class="neg">${fmt.pctSign(deltaYoy, 0)}</span> abaixo`}; face ao orçamento, ${deltaBudget >= 0 ? `<span class="pos">${fmt.pctSign(deltaBudget, 0)}</span> acima` : `<span class="neg">${fmt.pctSign(deltaBudget, 0)}</span> abaixo`}.`;
+    const part3 = ` Mantendo o ritmo atual, o mês deve fechar perto de <strong>${fmt.moneyShort(m.projectedRevenue)}</strong>, ${projectedYoy >= 0 ? `<span class="pos">${fmt.pctSign(projectedYoy, 0)}</span> acima do total de ${monthName} de 2025.` : `<span class="neg">${fmt.pctSign(projectedYoy, 0)}</span> abaixo do total de ${monthName} de 2025.`}`;
+    body = part1 + part2 + part3;
+  } else {
+    if (deltaBudget > 0.05) headline = `${cap(monthName)} runs <em>ahead of budget</em>, with the projection confirming the pace.`;
+    else if (deltaBudget < -0.05) headline = `${cap(monthName)} sits <em>below budget</em>, worth accelerating before month-end.`;
+    else if (deltaYoy > 0.05) headline = `${cap(monthName)} is beating last year, with cumulative revenue ahead.`;
+    else headline = `${cap(monthName)} runs a course <em>within the forecast</em>, with nuances that matter.`;
+
+    const part1 = `Through day ${m.dayOfMonth} of ${monthName}, month-to-date revenue stands at <strong>${fmt.moneyShort(m.mtd.revenue)}</strong>, with average occupancy of <strong>${fmt.pct(m.mtd.occ, 0)}</strong>.`;
+    const part2 = ` Against the same period of 2025, we are ${deltaYoy >= 0 ? `<span class="pos">${fmt.pctSign(deltaYoy, 0)}</span> ahead` : `<span class="neg">${fmt.pctSign(deltaYoy, 0)}</span> behind`}; against budget, ${deltaBudget >= 0 ? `<span class="pos">${fmt.pctSign(deltaBudget, 0)}</span> ahead` : `<span class="neg">${fmt.pctSign(deltaBudget, 0)}</span> behind`}.`;
+    const part3 = ` At the current pace, the month should close near <strong>${fmt.moneyShort(m.projectedRevenue)}</strong>, ${projectedYoy >= 0 ? `<span class="pos">${fmt.pctSign(projectedYoy, 0)}</span> above the full-month ${monthName} of 2025.` : `<span class="neg">${fmt.pctSign(projectedYoy, 0)}</span> below the full-month ${monthName} of 2025.`}`;
+    body = part1 + part2 + part3;
+  }
+
+  const foot = [
+    { label: L === 'pt' ? `Receita, ${monthName}` : `Revenue, ${cap(monthName)}`, value: fmt.moneyShort(m.mtd.revenue), klass: deltaYoy >= 0 ? 'pos' : 'neg' },
+    { label: L === 'pt' ? 'Projeção fim de mês' : 'Month-end projection',         value: fmt.moneyShort(m.projectedRevenue), klass: projectedYoy >= 0 ? 'pos' : 'neg' },
+    { label: L === 'pt' ? 'Ocupação média'      : 'Avg occupancy',                value: fmt.pct(m.mtd.occ, 0),              klass: m.mtd.occ >= m.lyMtd.occ ? 'pos' : 'neg' },
+    { label: L === 'pt' ? 'Tarifa média'        : 'Avg rate',                     value: fmt.money(m.mtd.adr, 0),            klass: m.mtd.adr >= m.lyMtd.adr ? 'pos' : 'neg' },
+  ];
+
+  return { headline, body, foot, m };
+}
+
+function buildPaceStory() {
+  const p = paceAnalysis();
+  const L = state.lang;
+  const h30 = p.horizons.find(x => x.h === 30);
+  const h90 = p.horizons.find(x => x.h === 90);
+
+  let headline, body;
+  if (L === 'pt') {
+    if (h30.deltaOcc > 0.07) headline = `Os próximos trinta dias estão <em>significativamente acima de 2025</em>, num sinal sólido.`;
+    else if (h30.deltaOcc < -0.05) headline = `Os próximos trinta dias preocupam, com ocupação <em>abaixo de 2025</em>.`;
+    else if (h90.deltaOcc > 0.05) headline = `O horizonte de noventa dias apresenta-se <em>mais robusto do que em 2025</em>.`;
+    else headline = `O ritmo de reservas mantém-se <em>próximo do ano passado</em>, com variações por janela.`;
+
+    const part1 = `Para os próximos trinta dias, as reservas já confirmadas equivalem a <strong>${fmt.pct(h30.occ, 0)}</strong> de ocupação, com receita prevista de <strong>${fmt.moneyShort(h30.revenue)}</strong>.`;
+    const part2 = ` Face a 2025, a ocupação a trinta dias está ${h30.deltaOcc >= 0 ? `<span class="pos">+${(h30.deltaOcc * 100).toFixed(1).replace('.',',')} pontos</span> acima` : `<span class="neg">${(h30.deltaOcc * 100).toFixed(1).replace('.',',')} pontos</span> abaixo`}.`;
+    const part3 = ` Estendendo a janela para noventa dias, as reservas confirmadas representam <strong>${fmt.pct(h90.occ, 0)}</strong> de ocupação, ${h90.deltaOcc >= 0 ? `com <span class="pos">${fmt.pctSign(h90.deltaOcc, 0)}</span> face ao ano passado.` : `com <span class="neg">${fmt.pctSign(h90.deltaOcc, 0)}</span> face ao ano passado.`}`;
+    body = part1 + part2 + part3;
+  } else {
+    if (h30.deltaOcc > 0.07) headline = `The next thirty days are <em>significantly ahead of 2025</em>, a solid signal.`;
+    else if (h30.deltaOcc < -0.05) headline = `The next thirty days raise concern, with occupancy <em>below 2025</em>.`;
+    else if (h90.deltaOcc > 0.05) headline = `The ninety-day horizon looks <em>more robust than 2025</em>.`;
+    else headline = `Booking pace stays <em>close to last year</em>, with window-by-window variations.`;
+
+    const part1 = `For the next thirty days, confirmed bookings already account for <strong>${fmt.pct(h30.occ, 0)}</strong> occupancy, with projected revenue of <strong>${fmt.moneyShort(h30.revenue)}</strong>.`;
+    const part2 = ` Versus 2025, thirty-day occupancy is ${h30.deltaOcc >= 0 ? `<span class="pos">+${(h30.deltaOcc * 100).toFixed(1)} points</span> ahead` : `<span class="neg">${(h30.deltaOcc * 100).toFixed(1)} points</span> behind`}.`;
+    const part3 = ` Extending the window to ninety days, confirmed bookings represent <strong>${fmt.pct(h90.occ, 0)}</strong> occupancy, ${h90.deltaOcc >= 0 ? `<span class="pos">${fmt.pctSign(h90.deltaOcc, 0)}</span> versus last year.` : `<span class="neg">${fmt.pctSign(h90.deltaOcc, 0)}</span> versus last year.`}`;
+    body = part1 + part2 + part3;
+  }
+
+  const foot = p.horizons.map(h => ({
+    label: L === 'pt' ? `${h.h} dias` : `${h.h} days`,
+    value: fmt.pct(h.occ, 0),
+    klass: h.deltaOcc >= 0 ? 'pos' : 'neg',
+  }));
+
+  return { headline, body, foot, p };
+}
+
+/* ───────── Render: The Week ───────── */
+function renderWeekView() {
+  const target = document.getElementById('view-week-content');
+  if (!target) return;
+  const s = buildWeekStory();
+  const w = s.w;
+  const L = state.lang;
+
+  const dayCells = w.days.map(d => {
+    const isBest = d.iso === w.bestDay.iso;
+    const isWorst = d.iso === w.worstDay.iso && d.iso !== w.bestDay.iso;
+    return `
+      <div class="day-cell ${isBest ? 'best' : ''} ${isWorst ? 'worst' : ''}">
+        <span class="dow">${weekdayShort(d.iso)}</span>
+        <span class="date">${new Date(d.iso).getDate()}</span>
+        <span class="occ">${fmt.pct(d.occ, 0)}</span>
+      </div>
+    `;
+  }).join('');
+
+  const campaignsHTML = CAMPAIGNS.map(c => {
+    const spendPct = c.budget ? Math.min(100, (c.spend / c.budget) * 100) : 0;
+    const roas = c.spend > 0 ? c.revenue / c.spend : null;
+    return `
+      <div class="campaign-row">
+        <div class="campaign-name">
+          <span class="n">${c.name[L]}</span>
+          <span class="meta">${isoToDayMonth(c.start)} → ${isoToDayMonth(c.end)}</span>
+        </div>
+        <div class="campaign-platform">
+          ${c.platform}
+          <span class="audience">${c.audience[L]}</span>
+        </div>
+        <div class="campaign-budget">
+          ${fmt.money(c.spend, 0)}
+          <span class="sub">${L === 'pt' ? 'de' : 'of'} ${fmt.money(c.budget, 0)}</span>
+          <div class="campaign-progress"><div class="campaign-progress-fill" style="width: ${spendPct.toFixed(0)}%"></div></div>
+        </div>
+        <div class="campaign-conv">
+          ${fmt.int(c.conversions)}
+          <span class="sub">${L === 'pt' ? 'reservas' : 'bookings'}</span>
+        </div>
+        <div class="campaign-rev">
+          ${fmt.moneyShort(c.revenue)}
+          <span class="sub">${roas ? (L === 'pt' ? `retorno ${roas.toFixed(1)}x` : `${roas.toFixed(1)}x return`) : (L === 'pt' ? 'sem custo' : 'no cost')}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  target.innerHTML = `
+    <article class="story rise d1">
+      <div class="story-eyebrow">
+        <span class="badge"><span class="dot"></span>${L === 'pt' ? 'Últimos 7 dias' : 'Past 7 days'}</span>
+        <span class="sep">·</span>
+        <span class="meta">${isoToDayMonth(w.start)} → ${isoToDayMonth(w.end)}</span>
+      </div>
+      <h1 class="story-headline">${s.headline}</h1>
+      <p class="story-body">${s.body}</p>
+      <div class="story-foot">
+        ${s.foot.map(f => `
+          <div class="story-tag">
+            <span>${f.label}</span>
+            <span class="v ${f.klass}">${f.value}</span>
+          </div>`).join('')}
+      </div>
+    </article>
+
+    <section class="section rise d2">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo I' : 'Chapter I'}</div>
+          <h2>${L === 'pt' ? 'O ritmo, ' : 'The rhythm, '}<em>${L === 'pt' ? 'dia a dia' : 'day by day'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'Cada dia, com a sua ocupação. O melhor e o mais discreto da semana destacam-se.' : 'Each day, with its occupancy. The best and the quietest day of the week stand out.'}</p>
+        </div>
+      </div>
+      <div class="day-strip">${dayCells}</div>
+    </section>
+
+    <section class="section rise d3">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo II' : 'Chapter II'}</div>
+          <h2>${L === 'pt' ? 'Campanhas ' : 'Active '}<em>${L === 'pt' ? 'ativas' : 'campaigns'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'O que está a correr agora, com o que está a gerar. Receita atribuída por modelo de last-click.' : 'What is running now, alongside what it is generating. Revenue attributed by last-click.'}</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <div class="campaign-list">
+            <div class="campaign-row header">
+              <span>${L === 'pt' ? 'Campanha' : 'Campaign'}</span>
+              <span>${L === 'pt' ? 'Plataforma' : 'Platform'}</span>
+              <span style="text-align: right;">${L === 'pt' ? 'Gasto' : 'Spend'}</span>
+              <span style="text-align: right;">${L === 'pt' ? 'Reservas' : 'Bookings'}</span>
+              <span style="text-align: right;">${L === 'pt' ? 'Receita' : 'Revenue'}</span>
+            </div>
+            ${campaignsHTML}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+/* ───────── Render: The Month ───────── */
+function renderMonthView() {
+  const target = document.getElementById('view-month-content');
+  if (!target) return;
+  const s = buildMonthStory();
+  const m = s.m;
+  const L = state.lang;
+  const monthName = I18N[L].months[new Date(CFG.todayISO).getMonth()];
+
+  const progressPct = (m.dayOfMonth / m.daysInMonth) * 100;
+  const budgetTotal = m.budget;
+  const actualPct = budgetTotal ? Math.min(100, (m.mtd.revenue / budgetTotal) * 100) : 0;
+  const projectedPct = budgetTotal ? Math.min(100, (m.projectedRevenue / budgetTotal) * 100) : 0;
+
+  target.innerHTML = `
+    <article class="story rise d1">
+      <div class="story-eyebrow">
+        <span class="badge"><span class="dot"></span>${cap(monthName)} ${new Date(CFG.todayISO).getFullYear()}</span>
+        <span class="sep">·</span>
+        <span class="meta">${L === 'pt' ? 'Dia' : 'Day'} ${m.dayOfMonth} ${L === 'pt' ? 'de' : 'of'} ${m.daysInMonth}</span>
+      </div>
+      <h1 class="story-headline">${s.headline}</h1>
+      <p class="story-body">${s.body}</p>
+      <div class="story-foot">
+        ${s.foot.map(f => `
+          <div class="story-tag">
+            <span>${f.label}</span>
+            <span class="v ${f.klass}">${f.value}</span>
+          </div>`).join('')}
+      </div>
+    </article>
+
+    <div class="month-progress rise d2">
+      <div class="month-progress-bar">
+        <div class="month-progress-budget" style="width: ${projectedPct.toFixed(1)}%"></div>
+        <div class="month-progress-actual"  style="width: ${actualPct.toFixed(1)}%"></div>
+      </div>
+      <div class="month-progress-labels">
+        <div class="lbl">
+          <span class="key">${L === 'pt' ? 'Realizado' : 'Actual'}</span>
+          <span class="val">${fmt.moneyShort(m.mtd.revenue)}</span>
+          <span class="sub">${L === 'pt' ? 'até dia' : 'through day'} ${m.dayOfMonth}</span>
+        </div>
+        <div class="lbl">
+          <span class="key">${L === 'pt' ? 'Orçamento, mês inteiro' : 'Budget, full month'}</span>
+          <span class="val">${fmt.moneyShort(m.budget)}</span>
+          <span class="sub ${m.mtd.revenue >= m.budgetMtd ? 'pos' : 'neg'}">${fmt.pctSign(pct(m.mtd.revenue, m.budgetMtd), 0)} ${L === 'pt' ? 'até hoje' : 'to date'}</span>
+        </div>
+        <div class="lbl">
+          <span class="key">${L === 'pt' ? 'Projeção, fim de mês' : 'Projection, month-end'}</span>
+          <span class="val">${fmt.moneyShort(m.projectedRevenue)}</span>
+          <span class="sub ${m.projectedRevenue >= m.budget ? 'pos' : 'neg'}">${fmt.pctSign(pct(m.projectedRevenue, m.budget), 0)} ${L === 'pt' ? 'vs. orçamento' : 'vs. budget'}</span>
+        </div>
+        <div class="lbl">
+          <span class="key">${L === 'pt' ? `${cap(monthName)} 2025` : `${cap(monthName)} 2025`}</span>
+          <span class="val">${fmt.moneyShort(m.lyFull.revenue)}</span>
+          <span class="sub ${m.projectedRevenue >= m.lyFull.revenue ? 'pos' : 'neg'}">${fmt.pctSign(pct(m.projectedRevenue, m.lyFull.revenue), 0)} ${L === 'pt' ? 'vs. ano passado' : 'vs. last year'}</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="section rise d3">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo I' : 'Chapter I'}</div>
+          <h2>${L === 'pt' ? 'A trajetória do ' : 'The trajectory of the '}<em>${L === 'pt' ? 'mês' : 'month'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'Receita acumulada, dia após dia, comparada com o orçamento. A linha continua até ao fim do mês com a projeção atual.' : 'Cumulative revenue, day after day, compared with budget. The line extends to month-end with the current projection.'}</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body" style="min-height: 320px;">
+          <canvas id="chart-month-trajectory"></canvas>
+        </div>
+      </div>
+    </section>
+  `;
+
+  // Render trajectory chart
+  setTimeout(() => renderMonthTrajectoryChart(m), 60);
+}
+
+function renderMonthTrajectoryChart(m) {
+  const ctx = document.getElementById('chart-month-trajectory');
+  if (!ctx) return;
+  if (charts.month) charts.month.destroy();
+
+  const labels = m.series.map(s => String(s.day));
+  const actualSeries = m.series.map(s => s.actual);
+  const budgetSeries = m.series.map(s => s.budget);
+  // Project line from today to end-of-month using current avg daily revenue
+  const dailyAvg = m.mtd.revenue / m.dayOfMonth;
+  const projSeries = m.series.map((s, i) => {
+    if (s.isPast) return null;
+    const daysAhead = s.day - m.dayOfMonth;
+    return m.mtd.revenue + dailyAvg * daysAhead;
+  });
+
+  const css = getComputedStyle(document.documentElement);
+  const moss = css.getPropertyValue('--tierra').trim();
+  const gold = css.getPropertyValue('--gold').trim();
+  const ink3 = css.getPropertyValue('--ink-3').trim();
+  const isDark = document.body.dataset.theme === 'dark';
+  const primary = isDark ? css.getPropertyValue('--gold').trim() : css.getPropertyValue('--tierra').trim();
+
+  charts.month = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: state.lang === 'pt' ? 'Orçamento acumulado' : 'Cumulative budget',
+          data: budgetSeries,
+          borderColor: ink3,
+          borderWidth: 1,
+          borderDash: [3, 4],
+          pointRadius: 0,
+          tension: 0.1,
+          fill: false,
+        },
+        {
+          label: state.lang === 'pt' ? 'Realizado' : 'Actual',
+          data: actualSeries,
+          borderColor: primary,
+          borderWidth: 1.75,
+          pointRadius: 0,
+          tension: 0.15,
+          fill: { target: 'origin', above: hexToRGBA(primary, 0.08) },
+        },
+        {
+          label: state.lang === 'pt' ? 'Projeção' : 'Projection',
+          data: projSeries,
+          borderColor: primary,
+          borderWidth: 1.25,
+          borderDash: [2, 3],
+          pointRadius: 0,
+          tension: 0.15,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      ...chartCommonOptions(),
+      plugins: {
+        ...chartCommonOptions().plugins,
+        tooltip: {
+          ...chartCommonOptions().plugins.tooltip,
+          callbacks: {
+            title: (items) => `${state.lang === 'pt' ? 'Dia' : 'Day'} ${items[0].label}`,
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y ? fmt.moneyShort(ctx.parsed.y) : '—'}`,
+          },
+        },
+      },
+    },
+  });
+}
+
+/* ───────── Render: Pace & Forecast ───────── */
+function renderPaceView() {
+  const target = document.getElementById('view-pace-content');
+  if (!target) return;
+  const s = buildPaceStory();
+  const p = s.p;
+  const L = state.lang;
+
+  const horizonCards = p.horizons.map(h => {
+    const klass = Math.abs(h.deltaOcc) < 0.005 ? 'flat' : (h.deltaOcc >= 0 ? 'pos' : 'neg');
+    const deltaPP = (h.deltaOcc * 100).toFixed(1).replace('.', L === 'pt' ? ',' : '.');
+    return `
+      <div class="pace-h">
+        <span class="head">${L === 'pt' ? 'Próximos' : 'Next'} ${h.h}d</span>
+        <span class="v">${(h.occ * 100).toFixed(0)}<span class="unit">%</span></span>
+        <span class="d ${klass}">${h.deltaOcc >= 0 ? '+' : ''}${deltaPP} ${L === 'pt' ? 'pontos vs. 2025' : 'points vs. 2025'}</span>
+      </div>
+    `;
+  }).join('');
+
+  target.innerHTML = `
+    <article class="story rise d1">
+      <div class="story-eyebrow">
+        <span class="badge"><span class="dot"></span>${L === 'pt' ? 'Reservas confirmadas' : 'Confirmed bookings'}</span>
+        <span class="sep">·</span>
+        <span class="meta">${L === 'pt' ? 'Janela móvel, próximos 90 dias' : 'Rolling window, next 90 days'}</span>
+      </div>
+      <h1 class="story-headline">${s.headline}</h1>
+      <p class="story-body">${s.body}</p>
+      <div class="story-foot">
+        ${s.foot.map(f => `
+          <div class="story-tag">
+            <span>${f.label}</span>
+            <span class="v ${f.klass}">${f.value}</span>
+          </div>`).join('')}
+      </div>
+    </article>
+
+    <section class="section rise d2">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo I' : 'Chapter I'}</div>
+          <h2>${L === 'pt' ? 'Ocupação confirmada, ' : 'Confirmed occupancy, '}<em>${L === 'pt' ? 'por horizonte' : 'by horizon'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'A ocupação já assegurada para cinco janelas, comparada com a mesma janela de 2025.' : 'Occupancy already secured across five windows, compared with the same window of 2025.'}</p>
+        </div>
+      </div>
+      <div class="pace-horizons">${horizonCards}</div>
+    </section>
+
+    <section class="section rise d3">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo II' : 'Chapter II'}</div>
+          <h2>${L === 'pt' ? 'A curva de ' : 'The '}<em>${L === 'pt' ? 'reservas' : 'pickup'}</em>${L === 'pt' ? '' : ' curve'}</h2>
+          <p class="dek">${L === 'pt' ? 'Quartos vendidos para cada dia dos próximos noventa, comparados com o ano passado.' : 'Rooms sold for each day of the next ninety, compared with last year.'}</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body" style="min-height: 320px;">
+          <canvas id="chart-pace"></canvas>
+        </div>
+      </div>
+    </section>
+  `;
+
+  setTimeout(() => renderPaceCurveChart(p), 60);
+}
+
+function renderPaceCurveChart(p) {
+  const ctx = document.getElementById('chart-pace');
+  if (!ctx) return;
+  if (charts.pace) charts.pace.destroy();
+
+  const labels = p.curve.map((c, i) => (i % 7 === 0 ? `+${c.day}` : ''));
+  const now = p.curve.map(c => c.otb);
+  const ly  = p.curve.map(c => c.ly);
+
+  const css = getComputedStyle(document.documentElement);
+  const ink3 = css.getPropertyValue('--ink-3').trim();
+  const isDark = document.body.dataset.theme === 'dark';
+  const primary = isDark ? css.getPropertyValue('--gold').trim() : css.getPropertyValue('--tierra').trim();
+
+  charts.pace = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: state.lang === 'pt' ? '2025' : '2025',
+          data: ly,
+          borderColor: ink3,
+          borderWidth: 1,
+          borderDash: [3, 4],
+          pointRadius: 0,
+          tension: 0.3,
+        },
+        {
+          label: state.lang === 'pt' ? '2026' : '2026',
+          data: now,
+          borderColor: primary,
+          borderWidth: 1.75,
+          pointRadius: 0,
+          tension: 0.3,
+          fill: { target: 'origin', above: hexToRGBA(primary, 0.08) },
+        },
+      ],
+    },
+    options: {
+      ...chartCommonOptions(),
+      scales: {
+        ...chartCommonOptions().scales,
+        y: {
+          ...chartCommonOptions().scales.y,
+          ticks: {
+            ...chartCommonOptions().scales.y.ticks,
+            callback: (v) => fmt.int(v),
+          },
+        },
+      },
+      plugins: {
+        ...chartCommonOptions().plugins,
+        tooltip: {
+          ...chartCommonOptions().plugins.tooltip,
+          callbacks: {
+            title: (items) => {
+              const idx = items[0].dataIndex;
+              return `${state.lang === 'pt' ? 'Daqui a' : 'In'} ${p.curve[idx].day} ${state.lang === 'pt' ? 'dias' : 'days'}`;
+            },
+            label: (ctx) => `${ctx.dataset.label}: ${fmt.int(ctx.parsed.y)} ${state.lang === 'pt' ? 'quartos' : 'rooms'}`,
+          },
+        },
+      },
+    },
+  });
+}
+
+/* ───────── Render: Sources (uploads) ───────── */
+const SOURCE_TYPES = [
+  { key: 'opera_production', label: { pt: 'Production Report', en: 'Production Report' }, desc: { pt: 'Receita por segmento, canal e source do Opera.', en: 'Revenue by segment, channel and source from Opera.' }, accept: '.html,.htm,.xlsx,.xls,.csv' },
+  { key: 'opera_segment',    label: { pt: 'Market Segment Statistics', en: 'Market Segment Statistics' }, desc: { pt: 'Ocupação, tarifa média e RevPAR por segmento.', en: 'Occupancy, average rate and RevPAR by segment.' }, accept: '.html,.htm,.xlsx,.xls,.csv' },
+  { key: 'opera_source',     label: { pt: 'Source of Business', en: 'Source of Business' }, desc: { pt: 'Origem das reservas, por canal e source.', en: 'Booking origin, by channel and source.' }, accept: '.html,.htm,.xlsx,.xls,.csv' },
+  { key: 'opera_forecast',   label: { pt: 'Forecast Report', en: 'Forecast Report' }, desc: { pt: 'Previsão de ocupação para os próximos 90 dias.', en: 'Occupancy forecast for the next 90 days.' }, accept: '.html,.htm,.xlsx,.xls,.csv' },
+  { key: 'ga4_overview',     label: { pt: 'GA4, visão geral', en: 'GA4 overview' }, desc: { pt: 'CSV exportado do GA4 com sessões e conversões por dia.', en: 'CSV exported from GA4 with sessions and conversions by day.' }, accept: '.csv' },
+  { key: 'ga4_sources',      label: { pt: 'GA4, source / medium', en: 'GA4 source / medium' }, desc: { pt: 'CSV do GA4 com sessões por origem e meio.', en: 'CSV from GA4 with sessions by source and medium.' }, accept: '.csv' },
+];
+
+function uploadKey(k) { return `vilalara_upload_${k}_v1`; }
+
+function loadUpload(k) {
+  try {
+    const raw = localStorage.getItem(uploadKey(k));
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function saveUpload(k, meta) {
+  try { localStorage.setItem(uploadKey(k), JSON.stringify(meta)); }
+  catch (e) { console.warn('Upload too large for LocalStorage', e); }
+}
+
+function clearUpload(k) {
+  try { localStorage.removeItem(uploadKey(k)); } catch (e) {}
+}
+
+function formatBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function renderSourcesView() {
+  const target = document.getElementById('view-sources-content');
+  if (!target) return;
+  const L = state.lang;
+
+  const dropzonesHTML = SOURCE_TYPES.map(s => {
+    const u = loadUpload(s.key);
+    return `
+      <label class="dropzone" data-source="${s.key}">
+        <span class="eyebrow">${s.key.startsWith('opera') ? 'Opera PMS' : 'Google Analytics'}</span>
+        <h4>${s.label[L]}</h4>
+        <p>${s.desc[L]}</p>
+        <input type="file" accept="${s.accept}" hidden />
+        <div class="dropzone-state ${u ? 'ok' : ''}">
+          ${u ? `
+            <span class="file-info">${u.name} · ${formatBytes(u.size)} · ${u.uploadedAt}</span>
+            <button type="button" class="clear-upload" data-source="${s.key}">${L === 'pt' ? 'Remover' : 'Remove'}</button>
+          ` : `<span>${L === 'pt' ? 'Arrasta um ficheiro para aqui, ou clica para selecionar.' : 'Drag a file here, or click to select.'}</span>`}
+        </div>
+      </label>
+    `;
+  }).join('');
+
+  target.innerHTML = `
+    <section class="section">
+      <div class="section-head rise d1">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo VIII' : 'Chapter VIII'}</div>
+          <h2>${L === 'pt' ? 'O ' : 'The '}<em>${L === 'pt' ? 'backstage' : 'backstage'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'Aqui carregas os relatórios do Opera e exports do GA4, e o dashboard passa a usar os teus números reais em vez dos dados de demonstração.' : 'Here you upload the Opera reports and GA4 exports, and the dashboard switches from demo data to your real numbers.'}</p>
+        </div>
+      </div>
+
+      <div class="sources-grid rise d2">${dropzonesHTML}</div>
+
+      <div class="sources-toolbar rise d3">
+        <button class="sources-action primary" id="export-state">${L === 'pt' ? 'Exportar estado' : 'Export state'}</button>
+        <button class="sources-action" id="import-state">${L === 'pt' ? 'Importar estado' : 'Import state'}</button>
+        <button class="sources-action" id="reset-state">${L === 'pt' ? 'Limpar tudo' : 'Clear all'}</button>
+        <span style="margin-left: auto; font-size: 0.75rem; color: var(--ink-3); align-self: center;">
+          ${L === 'pt' ? 'Parser do Opera em construção. Estão aceites HTML, Excel e CSV.' : 'Opera parser in development. HTML, Excel and CSV accepted.'}
+        </span>
+      </div>
+    </section>
+  `;
+
+  wireSourcesEvents();
+}
+
+function wireSourcesEvents() {
+  document.querySelectorAll('.dropzone').forEach(zone => {
+    const key = zone.dataset.source;
+    const input = zone.querySelector('input[type="file"]');
+
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('is-dragging');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('is-dragging'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('is-dragging');
+      const f = e.dataTransfer.files[0];
+      if (f) handleUpload(key, f);
+    });
+    input.addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (f) handleUpload(key, f);
+    });
+  });
+
+  document.querySelectorAll('.clear-upload').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      clearUpload(btn.dataset.source);
+      renderSourcesView();
+    });
+  });
+
+  const exportBtn = document.getElementById('export-state');
+  if (exportBtn) exportBtn.addEventListener('click', exportState);
+  const importBtn = document.getElementById('import-state');
+  if (importBtn) importBtn.addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json';
+    inp.addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = (ev) => importState(ev.target.result);
+      r.readAsText(f);
+    });
+    inp.click();
+  });
+  const resetBtn = document.getElementById('reset-state');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    if (confirm(state.lang === 'pt' ? 'Limpar todos os uploads e preferências? Não é reversível.' : 'Clear all uploads and preferences? Not reversible.')) {
+      SOURCE_TYPES.forEach(s => clearUpload(s.key));
+      localStorage.removeItem(CFG.storageKey);
+      renderSourcesView();
+    }
+  });
+}
+
+function handleUpload(key, file) {
+  const meta = {
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    uploadedAt: new Date().toLocaleString(state.lang === 'pt' ? 'pt-PT' : 'en-GB', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    }),
+  };
+  saveUpload(key, meta);
+  // TODO Phase IIb: parse file content here based on key
+  renderSourcesView();
+}
+
+function exportState() {
+  const payload = { prefs: null, uploads: {} };
+  try { payload.prefs = JSON.parse(localStorage.getItem(CFG.storageKey)); } catch (e) {}
+  SOURCE_TYPES.forEach(s => { payload.uploads[s.key] = loadUpload(s.key); });
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vilalara-pulse-state-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importState(jsonText) {
+  try {
+    const data = JSON.parse(jsonText);
+    if (data.prefs) localStorage.setItem(CFG.storageKey, JSON.stringify(data.prefs));
+    if (data.uploads) {
+      Object.entries(data.uploads).forEach(([k, v]) => { if (v) saveUpload(k, v); });
+    }
+    loadPrefs();
+    renderAll();
+  } catch (e) {
+    alert(state.lang === 'pt' ? 'Ficheiro inválido.' : 'Invalid file.');
+  }
+}
+
+/* ───────── 18. RENDER ALL ───────── */
+function renderAll() {
+  applyI18n();
+  rebuildEditorialHeadlines();
+  renderStory();
+  renderKPIs();
+  renderSegments();
+  renderMarkets();
+  renderRevenueChart();
+  renderPickupChart();
+  renderSectionMeta();
+  showView(state.view);
+}
+
+/* ───────── 19. BOOT ───────── */
+function boot() {
+  loadPrefs();
+  document.body.dataset.theme = state.theme;
+  document.body.dataset.lang = state.lang;
+  state.data = generateData();
+  wireEvents();
+  // Wait for Chart.js to load (defer)
+  if (typeof Chart === 'undefined') {
+    const wait = () => {
+      if (typeof Chart !== 'undefined') renderAll();
+      else setTimeout(wait, 40);
+    };
+    wait();
+  } else {
+    renderAll();
+  }
+}
+
+// Defer until DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
+</script>
+</body>
+</html>
