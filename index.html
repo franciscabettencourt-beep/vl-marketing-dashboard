@@ -1490,19 +1490,7 @@ button:focus-visible, .kpi:focus-visible {
     </section>
 
     <section class="view" data-view="digital" hidden>
-      <div class="section-head">
-        <div class="section-titles">
-          <div class="eyebrow">05</div>
-          <h2 data-i18n="digital.title">O <em>pulso digital</em></h2>
-          <p class="dek" data-i18n="digital.dek">GA4, paid media e o funil completo desde o anúncio até à reserva.</p>
-        </div>
-      </div>
-      <div class="coming">
-        <span class="eyebrow" data-i18n="coming.eyebrow">Próximo capítulo</span>
-        <h3 data-i18n="digital.coming">Digital Pulse <em>chega na Fase III</em></h3>
-        <p data-i18n="digital.copy">Integração GA4, Google Ads, Meta Ads. Funnel chart editorial, top campanhas, comparações YoY em todos os indicadores.</p>
-        <span class="coming-phase">Fase III</span>
-      </div>
+      <div id="view-digital-content"></div>
     </section>
 
     <section class="view" data-view="pace" hidden>
@@ -1557,32 +1545,274 @@ button:focus-visible, .kpi:focus-visible {
 /* ───────── 1. CONFIG ───────── */
 const CFG = {
   storageKey: 'vilalara_pulse_state_v1',
-  todayISO: '2026-05-25', // fixed seed so demo is deterministic; in real life: dayjs().format('YYYY-MM-DD')
-  rooms: 124,
+  todayISO: '2026-05-28', // matches Opera export "today"
+  rooms: 187, // physical capacity inferred from Opera forecast (104 rooms / 55.6% occ)
   resort: 'Vilalara Thalassa Resort',
+  hasReal2025: false, // we don't have 2025 historical; YoY uses estimated baseline
 };
 
+// MARKETS — real top 10 countries YTD 2026 from Opera Country by Day report
 const MARKETS = [
-  { code: 'DE', label: { pt: 'Alemanha',     en: 'Germany'     }, share: 0.235 },
-  { code: 'UK', label: { pt: 'Reino Unido',  en: 'United Kingdom' }, share: 0.205 },
-  { code: 'PT', label: { pt: 'Portugal',     en: 'Portugal'    }, share: 0.135 },
-  { code: 'NL', label: { pt: 'Países Baixos',en: 'Netherlands' }, share: 0.115 },
-  { code: 'FR', label: { pt: 'França',       en: 'France'      }, share: 0.090 },
-  { code: 'IE', label: { pt: 'Irlanda',      en: 'Ireland'     }, share: 0.070 },
-  { code: 'BE', label: { pt: 'Bélgica',      en: 'Belgium'     }, share: 0.050 },
-  { code: 'CH', label: { pt: 'Suíça',        en: 'Switzerland' }, share: 0.040 },
-  { code: 'ES', label: { pt: 'Espanha',      en: 'Spain'       }, share: 0.030 },
-  { code: 'US', label: { pt: 'EUA',          en: 'USA'         }, share: 0.030 },
+  { code: 'GB', label: { pt: 'Reino Unido',   en: 'United Kingdom' }, share: 0.206 },
+  { code: 'DE', label: { pt: 'Alemanha',      en: 'Germany'        }, share: 0.185 },
+  { code: 'US', label: { pt: 'Estados Unidos',en: 'United States'  }, share: 0.149 },
+  { code: 'CH', label: { pt: 'Suíça',         en: 'Switzerland'    }, share: 0.092 },
+  { code: 'PT', label: { pt: 'Portugal',      en: 'Portugal'       }, share: 0.080 },
+  { code: 'FR', label: { pt: 'França',        en: 'France'         }, share: 0.055 },
+  { code: 'NL', label: { pt: 'Países Baixos', en: 'Netherlands'    }, share: 0.047 },
+  { code: 'BE', label: { pt: 'Bélgica',       en: 'Belgium'        }, share: 0.039 },
+  { code: 'IE', label: { pt: 'Irlanda',       en: 'Ireland'        }, share: 0.030 },
+  { code: 'ES', label: { pt: 'Espanha',       en: 'Spain'          }, share: 0.031 },
 ];
 
+// CHANNELS — real channel mix YTD 2026 from Opera Matrix Report
 const CHANNELS = [
-  { code: 'direct',   label: { pt: 'Direto',         en: 'Direct'     }, sub: { pt: 'Web + Reservas', en: 'Web + Reservations' }, share: 0.32, cost: 0.04 },
-  { code: 'booking',  label: { pt: 'Booking.com',    en: 'Booking.com'}, sub: { pt: 'Plataforma online', en: 'Online platform'  }, share: 0.26, cost: 0.18 },
-  { code: 'expedia',  label: { pt: 'Expedia',        en: 'Expedia'    }, sub: { pt: 'Plataforma online', en: 'Online platform'  }, share: 0.11, cost: 0.20 },
-  { code: 'to',       label: { pt: 'Operadores',     en: 'Tour Operators'}, sub: { pt: 'TUI, DerTour, Jet2',en: 'TUI, DerTour, Jet2' }, share: 0.17, cost: 0.22 },
-  { code: 'corp',     label: { pt: 'Corporate',      en: 'Corporate'  }, sub: { pt: 'B2B contratado',  en: 'Contracted B2B'    }, share: 0.08, cost: 0.10 },
-  { code: 'other',    label: { pt: 'Outros',         en: 'Other'      }, sub: { pt: 'Grossistas, GDS', en: 'Wholesalers, GDS'   }, share: 0.06, cost: 0.15 },
+  { code: 'website',  label: { pt: 'Website direto',   en: 'Direct website'    }, sub: { pt: 'Reservas vilalararesort.com', en: 'vilalararesort.com bookings' }, share: 0.317, cost: 0.03 },
+  { code: 'ids',      label: { pt: 'Plataformas online',en: 'Online platforms' }, sub: { pt: 'Booking, Expedia, e outras', en: 'Booking, Expedia, others' },  share: 0.274, cost: 0.18 },
+  { code: 'to',       label: { pt: 'Operadores',       en: 'Tour Operators'    }, sub: { pt: 'TUI, DerTour, Jet2', en: 'TUI, DerTour, Jet2' },               share: 0.201, cost: 0.22 },
+  { code: 'direct',   label: { pt: 'Reservas diretas', en: 'Direct reservations'}, sub: { pt: 'Telefone, email, repeat guests', en: 'Phone, email, repeat guests' }, share: 0.139, cost: 0.04 },
+  { code: 'corp',     label: { pt: 'Corporate e outros',en: 'Corporate and other'}, sub: { pt: 'Empresas, agências, GDS', en: 'Corporate, travel agents, GDS' },  share: 0.045, cost: 0.10 },
+  { code: 'other',    label: { pt: 'Walk-in e várias', en: 'Walk-in and misc.' }, sub: { pt: 'Walk-in, proprietários, etc.', en: 'Walk-in, owners, etc.' },     share: 0.024, cost: 0.05 },
 ];
+
+// ═══════════════════════════════════════════════════════════════════════
+// REAL_DATA — Vilalara YTD 2026 from Opera exports (May 28, 2026 snapshot)
+// Source files: stat_countrybyday, resfutureoccupancy, matrix_report, otb_sales_statistics
+// ═══════════════════════════════════════════════════════════════════════
+const REAL_DATA = {
+  // Aggregated YTD totals from OTB Sales report
+  ytd: {
+    rooms: 7394,
+    revenue: 2251262,
+    availableRooms: 16053,
+    occupancy: 0.4606,    // 46.06%
+    adr: 304.47,
+    period: { from: '2026-01-01', to: '2026-05-27' },
+  },
+
+  // Daily room nights for 2026 historical (from Country by Day, aggregated)
+  // Used for daily charts and historical trends
+  dailyRooms: {
+    '2026-01-01': 0,  '2026-01-02': 0,  '2026-01-03': 0,  '2026-01-04': 0,  '2026-01-05': 0,
+    '2026-01-06': 0,  '2026-01-07': 0,  '2026-01-08': 0,  '2026-01-09': 0,  '2026-01-10': 0,
+    '2026-01-11': 0,  '2026-01-12': 0,  '2026-01-13': 0,  '2026-01-14': 0,  '2026-01-15': 0,
+    '2026-01-16': 0,  '2026-01-17': 0,  '2026-01-18': 0,  '2026-01-19': 1,  '2026-01-20': 1,
+    '2026-01-21': 1,  '2026-01-22': 1,  '2026-01-23': 1,  '2026-01-24': 1,  '2026-01-25': 2,
+    '2026-01-26': 2,  '2026-01-27': 2,  '2026-01-28': 2,  '2026-01-29': 2,  '2026-01-30': 1,
+    '2026-01-31': 1,
+    '2026-02-01': 1,  '2026-02-02': 1,  '2026-02-03': 1,  '2026-02-04': 1,  '2026-02-05': 1,
+    '2026-02-06': 1,  '2026-02-07': 1,  '2026-02-08': 1,  '2026-02-09': 1,  '2026-02-10': 1,
+    '2026-02-11': 1,  '2026-02-12': 1,  '2026-02-13': 2,  '2026-02-14': 22, '2026-02-15': 25,
+    '2026-02-16': 38, '2026-02-17': 30, '2026-02-18': 30, '2026-02-19': 28, '2026-02-20': 33,
+    '2026-02-21': 34, '2026-02-22': 25, '2026-02-23': 24, '2026-02-24': 27, '2026-02-25': 27,
+    '2026-02-26': 31, '2026-02-27': 31, '2026-02-28': 28,
+    '2026-03-01': 17, '2026-03-02': 21, '2026-03-03': 23, '2026-03-04': 32, '2026-03-05': 27,
+    '2026-03-06': 30, '2026-03-07': 40, '2026-03-08': 32, '2026-03-09': 56, '2026-03-10': 53,
+    '2026-03-11': 41, '2026-03-12': 42, '2026-03-13': 52, '2026-03-14': 56, '2026-03-15': 58,
+    '2026-03-16': 47, '2026-03-17': 61, '2026-03-18': 55, '2026-03-19': 56, '2026-03-20': 69,
+    '2026-03-21': 75, '2026-03-22': 75, '2026-03-23': 80, '2026-03-24': 87, '2026-03-25': 91,
+    '2026-03-26': 96, '2026-03-27': 110,'2026-03-28': 113,'2026-03-29': 109,'2026-03-30': 112,
+    '2026-03-31': 105,
+    '2026-04-01': 120,'2026-04-02': 125,'2026-04-03': 133,'2026-04-04': 135,'2026-04-05': 129,
+    '2026-04-06': 120,'2026-04-07': 116,'2026-04-08': 116,'2026-04-09': 118,'2026-04-10': 128,
+    '2026-04-11': 113,'2026-04-12': 95, '2026-04-13': 69, '2026-04-14': 68, '2026-04-15': 85,
+    '2026-04-16': 77, '2026-04-17': 82, '2026-04-18': 84, '2026-04-19': 73, '2026-04-20': 81,
+    '2026-04-21': 76, '2026-04-22': 76, '2026-04-23': 87, '2026-04-24': 89, '2026-04-25': 82,
+    '2026-04-26': 97, '2026-04-27': 91, '2026-04-28': 93, '2026-04-29': 80, '2026-04-30': 75,
+    '2026-05-01': 82, '2026-05-02': 91, '2026-05-03': 86, '2026-05-04': 86, '2026-05-05': 91,
+    '2026-05-06': 82, '2026-05-07': 86, '2026-05-08': 76, '2026-05-09': 65, '2026-05-10': 63,
+    '2026-05-11': 71, '2026-05-12': 74, '2026-05-13': 85, '2026-05-14': 100,'2026-05-15': 109,
+    '2026-05-16': 119,'2026-05-17': 118,'2026-05-18': 112,'2026-05-19': 114,'2026-05-20': 119,
+    '2026-05-21': 117,'2026-05-22': 115,'2026-05-23': 128,'2026-05-24': 125,'2026-05-25': 135,
+    '2026-05-26': 126,'2026-05-27': 132,
+  },
+
+  // Daily forecast (from Future Occupancy report) — rooms, revenue, occupancy, ADR per day
+  dailyForecast: {
+    '2026-05-28': { rooms: 104, revenue: 44309.60, occ: 0.5561, adr: 426.05 },
+    '2026-05-29': { rooms: 105, revenue: 46421.98, occ: 0.5615, adr: 442.11 },
+    '2026-05-30': { rooms: 79,  revenue: 31560.60, occ: 0.4225, adr: 399.50 },
+    '2026-05-31': { rooms: 79,  revenue: 30940.46, occ: 0.4225, adr: 391.65 },
+    '2026-06-01': { rooms: 97,  revenue: 41493.38, occ: 0.5187, adr: 427.77 },
+    '2026-06-02': { rooms: 104, revenue: 45748.63, occ: 0.5561, adr: 439.89 },
+    '2026-06-03': { rooms: 119, revenue: 51499.14, occ: 0.6398, adr: 432.77 },
+    '2026-06-04': { rooms: 123, revenue: 52548.34, occ: 0.6613, adr: 427.22 },
+    '2026-06-05': { rooms: 117, revenue: 49732.32, occ: 0.6290, adr: 425.06 },
+    '2026-06-06': { rooms: 121, revenue: 50070.18, occ: 0.6505, adr: 413.80 },
+    '2026-06-07': { rooms: 111, revenue: 45356.41, occ: 0.5968, adr: 408.62 },
+    '2026-06-08': { rooms: 107, revenue: 41360.93, occ: 0.5753, adr: 386.55 },
+    '2026-06-09': { rooms: 111, revenue: 44169.85, occ: 0.5968, adr: 397.93 },
+    '2026-06-10': { rooms: 112, revenue: 46029.51, occ: 0.6054, adr: 410.98 },
+    '2026-06-11': { rooms: 106, revenue: 44618.86, occ: 0.5699, adr: 420.93 },
+    '2026-06-12': { rooms: 94,  revenue: 38697.58, occ: 0.5054, adr: 411.68 },
+    '2026-06-13': { rooms: 93,  revenue: 39826.87, occ: 0.5000, adr: 428.25 },
+    '2026-06-14': { rooms: 105, revenue: 47309.20, occ: 0.5645, adr: 450.56 },
+    '2026-06-15': { rooms: 108, revenue: 50879.58, occ: 0.5806, adr: 471.11 },
+    '2026-06-16': { rooms: 119, revenue: 55895.89, occ: 0.6398, adr: 469.71 },
+    '2026-06-17': { rooms: 118, revenue: 55930.94, occ: 0.6344, adr: 473.99 },
+    '2026-06-18': { rooms: 114, revenue: 52301.66, occ: 0.6129, adr: 458.79 },
+    '2026-06-19': { rooms: 109, revenue: 52794.43, occ: 0.5860, adr: 484.35 },
+    '2026-06-20': { rooms: 107, revenue: 50598.71, occ: 0.5753, adr: 472.89 },
+    '2026-06-21': { rooms: 97,  revenue: 45827.42, occ: 0.5243, adr: 472.45 },
+    '2026-06-22': { rooms: 117, revenue: 55627.00, occ: 0.6290, adr: 475.44 },
+    '2026-06-23': { rooms: 104, revenue: 48385.45, occ: 0.5591, adr: 465.24 },
+    '2026-06-24': { rooms: 93,  revenue: 43004.77, occ: 0.5027, adr: 462.42 },
+    '2026-06-25': { rooms: 91,  revenue: 41141.81, occ: 0.4892, adr: 452.11 },
+    '2026-06-26': { rooms: 94,  revenue: 44878.55, occ: 0.5054, adr: 477.43 },
+    '2026-06-27': { rooms: 88,  revenue: 48971.99, occ: 0.4731, adr: 556.50 },
+    '2026-06-28': { rooms: 80,  revenue: 44689.81, occ: 0.4301, adr: 558.62 },
+    '2026-06-29': { rooms: 87,  revenue: 48589.93, occ: 0.4677, adr: 558.50 },
+    '2026-06-30': { rooms: 75,  revenue: 41841.30, occ: 0.4032, adr: 557.88 },
+    '2026-07-01': { rooms: 95,  revenue: 54582.53, occ: 0.5108, adr: 574.55 },
+    '2026-07-02': { rooms: 99,  revenue: 55739.64, occ: 0.5294, adr: 563.03 },
+    '2026-07-03': { rooms: 103, revenue: 57836.40, occ: 0.5508, adr: 561.52 },
+    '2026-07-04': { rooms: 100, revenue: 56484.66, occ: 0.5348, adr: 564.85 },
+    '2026-07-05': { rooms: 108, revenue: 59844.41, occ: 0.5775, adr: 554.11 },
+    '2026-07-06': { rooms: 116, revenue: 63716.57, occ: 0.6203, adr: 549.28 },
+    '2026-07-07': { rooms: 109, revenue: 59710.98, occ: 0.5829, adr: 547.81 },
+    '2026-07-08': { rooms: 103, revenue: 55251.60, occ: 0.5508, adr: 536.42 },
+    '2026-07-09': { rooms: 96,  revenue: 51082.97, occ: 0.5161, adr: 532.11 },
+    '2026-07-10': { rooms: 101, revenue: 61033.48, occ: 0.5430, adr: 604.29 },
+    '2026-07-11': { rooms: 106, revenue: 62569.64, occ: 0.5699, adr: 590.28 },
+    '2026-07-12': { rooms: 100, revenue: 55551.94, occ: 0.5376, adr: 555.52 },
+    '2026-07-13': { rooms: 97,  revenue: 55087.75, occ: 0.5243, adr: 567.91 },
+    '2026-07-14': { rooms: 94,  revenue: 56268.09, occ: 0.5081, adr: 598.60 },
+    '2026-07-15': { rooms: 99,  revenue: 61568.91, occ: 0.5351, adr: 621.91 },
+    '2026-07-16': { rooms: 106, revenue: 66104.13, occ: 0.5730, adr: 623.62 },
+    '2026-07-17': { rooms: 103, revenue: 63753.43, occ: 0.5598, adr: 618.97 },
+    '2026-07-18': { rooms: 115, revenue: 69720.77, occ: 0.6284, adr: 606.27 },
+    '2026-07-19': { rooms: 106, revenue: 63759.16, occ: 0.5761, adr: 601.50 },
+    '2026-07-20': { rooms: 113, revenue: 70748.34, occ: 0.6141, adr: 626.09 },
+    '2026-07-21': { rooms: 126, revenue: 79277.93, occ: 0.6848, adr: 629.19 },
+    '2026-07-22': { rooms: 117, revenue: 72025.17, occ: 0.6359, adr: 615.60 },
+    '2026-07-23': { rooms: 109, revenue: 68470.91, occ: 0.5924, adr: 628.17 },
+    '2026-07-24': { rooms: 102, revenue: 65201.31, occ: 0.5543, adr: 639.23 },
+    '2026-07-25': { rooms: 109, revenue: 68157.79, occ: 0.5924, adr: 625.30 },
+    '2026-07-26': { rooms: 113, revenue: 66817.68, occ: 0.6141, adr: 591.31 },
+    '2026-07-27': { rooms: 112, revenue: 64008.86, occ: 0.6087, adr: 571.51 },
+    '2026-07-28': { rooms: 105, revenue: 61004.78, occ: 0.5707, adr: 581.00 },
+    '2026-07-29': { rooms: 102, revenue: 57954.76, occ: 0.5543, adr: 568.18 },
+    '2026-07-30': { rooms: 108, revenue: 65610.97, occ: 0.5870, adr: 607.51 },
+    '2026-07-31': { rooms: 105, revenue: 63621.92, occ: 0.5707, adr: 605.92 },
+    '2026-08-01': { rooms: 117, revenue: 73560.10, occ: 0.6257, adr: 628.72 },
+    '2026-08-02': { rooms: 111, revenue: 70309.74, occ: 0.5936, adr: 633.42 },
+    '2026-08-03': { rooms: 122, revenue: 76907.92, occ: 0.6524, adr: 630.39 },
+    '2026-08-04': { rooms: 127, revenue: 80592.85, occ: 0.6791, adr: 634.59 },
+    '2026-08-05': { rooms: 119, revenue: 73802.31, occ: 0.6364, adr: 620.19 },
+    '2026-08-06': { rooms: 128, revenue: 79474.68, occ: 0.6845, adr: 620.90 },
+    '2026-08-07': { rooms: 121, revenue: 76150.30, occ: 0.6471, adr: 629.34 },
+    '2026-08-08': { rooms: 120, revenue: 79486.73, occ: 0.6417, adr: 662.39 },
+    '2026-08-09': { rooms: 113, revenue: 73811.80, occ: 0.6043, adr: 653.20 },
+    '2026-08-10': { rooms: 116, revenue: 75940.62, occ: 0.6203, adr: 654.66 },
+    '2026-08-11': { rooms: 117, revenue: 75846.27, occ: 0.6257, adr: 648.26 },
+    '2026-08-12': { rooms: 109, revenue: 71131.76, occ: 0.5829, adr: 652.58 },
+    '2026-08-13': { rooms: 98,  revenue: 63855.42, occ: 0.5241, adr: 651.59 },
+    '2026-08-14': { rooms: 100, revenue: 63957.59, occ: 0.5376, adr: 639.58 },
+    '2026-08-15': { rooms: 80,  revenue: 49882.26, occ: 0.4301, adr: 623.53 },
+    '2026-08-16': { rooms: 84,  revenue: 53200.81, occ: 0.4516, adr: 633.34 },
+    '2026-08-17': { rooms: 88,  revenue: 55491.69, occ: 0.4731, adr: 630.59 },
+    '2026-08-18': { rooms: 86,  revenue: 52589.44, occ: 0.4624, adr: 611.51 },
+    '2026-08-19': { rooms: 91,  revenue: 53068.96, occ: 0.4866, adr: 583.18 },
+    '2026-08-20': { rooms: 94,  revenue: 56013.22, occ: 0.5027, adr: 595.89 },
+    '2026-08-21': { rooms: 72,  revenue: 42523.23, occ: 0.3850, adr: 590.60 },
+    '2026-08-22': { rooms: 66,  revenue: 40098.63, occ: 0.3529, adr: 607.55 },
+    '2026-08-23': { rooms: 71,  revenue: 44364.22, occ: 0.3797, adr: 624.85 },
+    '2026-08-24': { rooms: 73,  revenue: 45576.97, occ: 0.3904, adr: 624.34 },
+    '2026-08-25': { rooms: 73,  revenue: 45466.37, occ: 0.3904, adr: 622.83 },
+    '2026-08-26': { rooms: 70,  revenue: 43531.41, occ: 0.3743, adr: 621.88 },
+    '2026-08-27': { rooms: 69,  revenue: 42142.64, occ: 0.3690, adr: 610.76 },
+    '2026-08-28': { rooms: 65,  revenue: 40146.32, occ: 0.3476, adr: 617.64 },
+    '2026-08-29': { rooms: 58,  revenue: 36108.10, occ: 0.3085, adr: 622.55 },
+    '2026-08-30': { rooms: 50,  revenue: 30097.04, occ: 0.2660, adr: 601.94 },
+    '2026-08-31': { rooms: 47,  revenue: 28132.95, occ: 0.2500, adr: 598.57 },
+  },
+
+  // Top 15 markets by room nights YTD 2026
+  topCountries: [
+    { code: 'GB', name: { pt: 'Reino Unido',     en: 'United Kingdom' }, rooms: 1522 },
+    { code: 'DE', name: { pt: 'Alemanha',        en: 'Germany'        }, rooms: 1366 },
+    { code: 'US', name: { pt: 'Estados Unidos',  en: 'United States'  }, rooms: 1100 },
+    { code: 'CH', name: { pt: 'Suíça',           en: 'Switzerland'    }, rooms: 683  },
+    { code: 'PT', name: { pt: 'Portugal',        en: 'Portugal'       }, rooms: 588  },
+    { code: 'FR', name: { pt: 'França',          en: 'France'         }, rooms: 406  },
+    { code: 'NL', name: { pt: 'Países Baixos',   en: 'Netherlands'    }, rooms: 346  },
+    { code: 'BE', name: { pt: 'Bélgica',         en: 'Belgium'        }, rooms: 286  },
+    { code: 'IE', name: { pt: 'Irlanda',         en: 'Ireland'        }, rooms: 225  },
+    { code: 'ES', name: { pt: 'Espanha',         en: 'Spain'          }, rooms: 228  },
+    { code: 'CA', name: { pt: 'Canadá',          en: 'Canada'         }, rooms: 203  },
+    { code: 'PL', name: { pt: 'Polónia',         en: 'Poland'         }, rooms: 114  },
+    { code: 'IT', name: { pt: 'Itália',          en: 'Italy'          }, rooms: 109  },
+    { code: 'AT', name: { pt: 'Áustria',         en: 'Austria'        }, rooms: 89   },
+    { code: 'LU', name: { pt: 'Luxemburgo',      en: 'Luxembourg'     }, rooms: 81   },
+  ],
+
+  // Channel breakdown YTD 2026 from Matrix Report
+  channelBreakdown: [
+    { code: 'website',  name: { pt: 'Website direto',    en: 'Direct website'    }, rooms: 2344 },
+    { code: 'ids',      name: { pt: 'Plataformas online',en: 'Online platforms'  }, rooms: 2024 },
+    { code: 'to',       name: { pt: 'Operadores',        en: 'Tour Operators'    }, rooms: 1487 },
+    { code: 'direct',   name: { pt: 'Reservas diretas',  en: 'Direct reservations'}, rooms: 1029 },
+    { code: 'other',    name: { pt: 'Outros',            en: 'Other'             }, rooms: 120  },
+    { code: 'spec',     name: { pt: 'Empresas especializadas', en: 'Specialized companies' }, rooms: 108 },
+    { code: 'corp',     name: { pt: 'Corporate',         en: 'Corporate'         }, rooms: 106  },
+    { code: 'ta',       name: { pt: 'Agências de viagens',en: 'Travel agents'    }, rooms: 90   },
+    { code: 'owner',    name: { pt: 'Proprietários',     en: 'Owners'            }, rooms: 41   },
+    { code: 'walkin',   name: { pt: 'Walk-in',           en: 'Walk-in'           }, rooms: 30   },
+    { code: 'gds',      name: { pt: 'Sistemas GDS',      en: 'GDS systems'       }, rooms: 15   },
+  ],
+
+  // Segment mix YTD 2026 from Matrix Report
+  segmentMix: [
+    { code: 'IND', name: { pt: 'Individual',     en: 'Individual'     }, rooms: 6986 },
+    { code: 'GRL', name: { pt: 'Grupos Lazer',   en: 'Groups Leisure' }, rooms: 212  },
+    { code: 'HOU', name: { pt: 'House use',      en: 'House use'      }, rooms: 87   },
+    { code: 'GRM', name: { pt: 'Grupos Meeting', en: 'Groups Meeting' }, rooms: 68   },
+    { code: 'OWN', name: { pt: 'Proprietários',  en: 'Owners'         }, rooms: 41   },
+  ],
+
+  // GA4 traffic acquisition YTD 2026 (Jan 1 to May 28, blue & green property)
+  ga4: {
+    period: { from: '2026-01-01', to: '2026-05-28' },
+    totalSessions: 106603,
+    totalRevenue: 2599122,
+    totalConversions: 186320,
+    channels: [
+      { code: 'paid_search',    name: { pt: 'Paid Search',    en: 'Paid Search'    }, sessions: 37242, conversions: 71925, convRate: 0.5819, revenue: 1151153 },
+      { code: 'organic_search', name: { pt: 'Organic Search', en: 'Organic Search' }, sessions: 27244, conversions: 57719, convRate: 0.6019, revenue: 878586  },
+      { code: 'direct',         name: { pt: 'Direct',         en: 'Direct'         }, sessions: 19071, conversions: 28185, convRate: 0.5235, revenue: 367955  },
+      { code: 'referral',       name: { pt: 'Referral',       en: 'Referral'       }, sessions: 5649,  conversions: 6038,  convRate: 0.3332, revenue: 86363   },
+      { code: 'email',          name: { pt: 'Email',          en: 'Email'          }, sessions: 4439,  conversions: 6157,  convRate: 0.5208, revenue: 57768   },
+      { code: 'paid_social',    name: { pt: 'Paid Social',    en: 'Paid Social'    }, sessions: 4381,  conversions: 3818,  convRate: 0.3753, revenue: 3803    },
+      { code: 'organic_social', name: { pt: 'Organic Social', en: 'Organic Social' }, sessions: 4111,  conversions: 5987,  convRate: 0.5867, revenue: 12328   },
+      { code: 'unassigned',     name: { pt: 'Não atribuído',  en: 'Unassigned'     }, sessions: 3023,  conversions: 5200,  convRate: 0.5984, revenue: 40027   },
+      { code: 'cross_network',  name: { pt: 'Cross-network',  en: 'Cross-network'  }, sessions: 742,   conversions: 852,   convRate: 0.4582, revenue: 1098    },
+      { code: 'paid_other',     name: { pt: 'Paid Other',     en: 'Paid Other'     }, sessions: 661,   conversions: 439,   convRate: 0.4266, revenue: 0       },
+    ],
+  },
+
+  // Real campaigns from Google Ads (May 2026) + Meta Ads (last 30d screenshot)
+  campaigns: [
+    // Google Ads top 5
+    { id: 'g_us', platform: 'Google Ads', name: { pt: 'Brand Search, Estados Unidos', en: 'Brand Search, United States' }, audience: { pt: 'Pesquisa pela marca, mercado US', en: 'Brand search, US market' }, period: '2026-05', spend: 2307, impressions: 7130, clicks: 1412, conversions: 30, revenue: 76853, roas: 33.3 },
+    { id: 'g_ww', platform: 'Google Ads', name: { pt: 'Brand Search, Worldwide', en: 'Brand Search, Worldwide' }, audience: { pt: 'Pesquisa pela marca, global', en: 'Brand search, global' }, period: '2026-05', spend: 1975, impressions: 8778, clicks: 1465, conversions: 17, revenue: 49689, roas: 25.2 },
+    { id: 'g_uk', platform: 'Google Ads', name: { pt: 'Brand Search, Reino Unido', en: 'Brand Search, United Kingdom' }, audience: { pt: 'Pesquisa pela marca, UK', en: 'Brand search, UK' }, period: '2026-05', spend: 3103, impressions: 7598, clicks: 1768, conversions: 12, revenue: 30305, roas: 9.8 },
+    { id: 'g_de', platform: 'Google Ads', name: { pt: 'Brand Search, Alemanha', en: 'Brand Search, Germany' }, audience: { pt: 'Pesquisa pela marca, DE', en: 'Brand search, DE' }, period: '2026-05', spend: 1240, impressions: 3140, clicks: 689, conversions: 5, revenue: 19993, roas: 16.1 },
+    { id: 'g_ch', platform: 'Google Ads', name: { pt: 'Brand Search, Suíça', en: 'Brand Search, Switzerland' }, audience: { pt: 'Pesquisa pela marca, CH', en: 'Brand search, CH' }, period: '2026-05', spend: 235, impressions: 1007, clicks: 296, conversions: 2, revenue: 14798, roas: 63.0 },
+    { id: 'g_pmax_uk', platform: 'Google Ads', name: { pt: 'Performance Max, UK', en: 'Performance Max, UK' }, audience: { pt: 'PMax, UK', en: 'PMax, UK' }, period: '2026-05', spend: 639, impressions: 143171, clicks: 560, conversions: 2, revenue: 13499, roas: 21.1 },
+    // Meta Ads top 3
+    { id: 'm_clusters', platform: 'Meta Ads', name: { pt: 'Clusters, Janeiro 2026', en: 'Clusters, January 2026' }, audience: { pt: 'Clusters de audiência', en: 'Audience clusters' }, period: '2026-05', spend: 2966, impressions: 464114, clicks: 7053, conversions: 23, revenue: 56523, roas: 19.1 },
+    { id: 'm_push_jan', platform: 'Meta Ads', name: { pt: 'Push, Janeiro 2026', en: 'Push, January 2026' }, audience: { pt: 'Audiências de remarketing', en: 'Remarketing audiences' }, period: '2026-05', spend: 2066, impressions: 142535, clicks: 3041, conversions: 21, revenue: 49006, roas: 23.7 },
+    { id: 'm_push_mar', platform: 'Meta Ads', name: { pt: 'Push, Março 2026', en: 'Push, March 2026' }, audience: { pt: 'Audiências de remarketing', en: 'Remarketing audiences' }, period: '2026-05', spend: 607, impressions: 47917, clicks: 768, conversions: 4, revenue: 13014, roas: 21.4 },
+    { id: 'm_families', platform: 'Meta Ads', name: { pt: 'Push, Famílias, Maio 2026', en: 'Push, Families, May 2026' }, audience: { pt: 'Famílias, Maio', en: 'Families, May' }, period: '2026-05', spend: 63, impressions: 10415, clicks: 308, conversions: 1, revenue: 1971, roas: 31.3 },
+  ],
+
+  // Aggregated paid media totals
+  paidMedia: {
+    google: { spend: 12462, conversions: 73, revenue: 222309, roas: 17.8 },
+    meta:   { spend: 8783,  conversions: 49, revenue: 120511, roas: 13.7 }, // Meta visible campaigns sum (total acct €34k is the wider window)
+    metaAccount: { spend: 34240, clicks: 11890, revenue: 120510, ctr: 0.030 },
+  },
+};
 
 // Synthetic active campaigns for The Week view. Replaced by real data later via Sources panel.
 const CAMPAIGNS = [
@@ -1997,6 +2227,38 @@ function generateData() {
   return { days, byISO: Object.fromEntries(days.map(d => [d.iso, d])) };
 }
 
+// Overlay REAL_DATA on top of synthetic days for 2026 dates we have actual numbers for.
+function applyRealData() {
+  if (!state.data) return;
+  // Historical 2026 (rooms only, no daily revenue/ADR available)
+  for (const iso in REAL_DATA.dailyRooms) {
+    if (state.data.byISO[iso]) {
+      const rooms = REAL_DATA.dailyRooms[iso];
+      const occ = rooms / CFG.rooms;
+      // For historical days without daily revenue, use YTD average ADR as proxy
+      const adr = REAL_DATA.ytd.adr;
+      const revenue = rooms * adr;
+      Object.assign(state.data.byISO[iso], {
+        occ, adr, roomsSold: rooms, revenue,
+        revpar: revenue / CFG.rooms,
+        isReal: true,
+      });
+    }
+  }
+  // Future forecast (full daily detail available)
+  for (const iso in REAL_DATA.dailyForecast) {
+    if (state.data.byISO[iso]) {
+      const f = REAL_DATA.dailyForecast[iso];
+      Object.assign(state.data.byISO[iso], {
+        occ: f.occ, adr: f.adr, roomsSold: f.rooms, revenue: f.revenue,
+        revpar: f.revenue / CFG.rooms,
+        fcast: f.revenue,
+        isReal: true, isForecast: true,
+      });
+    }
+  }
+}
+
 /* ───────── 5. ANALYZER ───────── */
 function dayData(iso) { return state.data.byISO[iso]; }
 
@@ -2200,13 +2462,13 @@ function buildStory() {
   }
   const directDelta = pct(directNow, directPrev);
 
-  // OTA decline?
+  // Online platforms share trend (replaces booking + expedia from old channel codes)
   let otaNow = 0, otaPrev = 0;
   for (let i = 0; i < 7; i++) {
     const d = dayData(addDays(CFG.todayISO, -i));
     const p = dayData(addDays(stlyAnchor(CFG.todayISO), -i));
-    otaNow += d.roomsSold * (d.channelShare.booking + d.channelShare.expedia);
-    otaPrev += p.roomsSold * (p.channelShare.booking + p.channelShare.expedia);
+    otaNow += d.roomsSold * (d.channelShare.ids || 0);
+    otaPrev += p.roomsSold * (p.channelShare.ids || 0);
   }
   const otaDelta = pct(otaNow, otaPrev);
 
@@ -2515,90 +2777,66 @@ function renderKPIs() {
 
 /* ───────── 12. RENDER — segments & markets ───────── */
 function renderSegments() {
-  const today = dayData(CFG.todayISO);
-  const stly = dayData(stlyAnchor(CFG.todayISO));
-
-  const rows = CHANNELS.map(ch => ({
-    code: ch.code,
-    label: ch.label[state.lang],
-    sub: ch.sub[state.lang],
-    share: today.channelShare[ch.code],
-    prevShare: stly.channelShare[ch.code],
-  })).sort((a,b) => b.share - a.share);
+  // Use REAL_DATA channel breakdown YTD 2026
+  const L = state.lang;
+  const totalRooms = REAL_DATA.channelBreakdown.reduce((s,c) => s + c.rooms, 0);
+  const rows = REAL_DATA.channelBreakdown
+    .map(c => ({ ...c, share: c.rooms / totalRooms }))
+    .sort((a,b) => b.share - a.share)
+    .slice(0, 6);
 
   const maxShare = rows[0].share;
   const list = document.getElementById('seg-list');
-  list.innerHTML = rows.map(r => {
-    const delta = r.share - r.prevShare;
-    const deltaStr = (delta * 100).toFixed(1).replace('.', state.lang === 'pt' ? ',' : '.');
-    const sign = delta >= 0 ? '+' : '';
-    const klass = Math.abs(delta) < 0.005 ? 'flat' : (delta >= 0 ? 'pos' : 'neg');
-    return `
-      <div class="seg-row">
-        <div class="seg-name">${r.label}<span class="sub">${r.sub}</span></div>
-        <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
-        <div class="seg-val">${fmt.pct(r.share, 0)}<span class="pct ${klass}">${sign}${deltaStr} ${state.lang === 'pt' ? 'pontos' : 'points'}</span></div>
-      </div>
-    `;
-  }).join('');
+  list.innerHTML = rows.map(r => `
+    <div class="seg-row">
+      <div class="seg-name">${r.name[L]}<span class="sub">${fmt.int(r.rooms)} ${L === 'pt' ? 'quartos YTD' : 'rooms YTD'}</span></div>
+      <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
+      <div class="seg-val">${fmt.pct(r.share, 0)}<span class="pct">${L === 'pt' ? '2026' : '2026'}</span></div>
+    </div>
+  `).join('');
 
-  const direct = rows.find(r => r.code === 'direct');
-  const directDeltaPP = (direct.share - direct.prevShare) * 100;
+  // Editorial insight from real data
+  const website = rows.find(r => r.code === 'website');
+  const direct  = rows.find(r => r.code === 'direct');
+  const ids     = rows.find(r => r.code === 'ids');
+  const ownDirect = (website.rooms + direct.rooms) / totalRooms;
+
   let insight;
-  if (state.lang === 'pt') {
-    if (directDeltaPP > 1) insight = `O canal <strong>direto</strong> ganha <span class="pos">+${directDeltaPP.toFixed(1).replace('.',',')} pontos</span> de quota face a 2025, uma boa notícia para a margem.`;
-    else if (directDeltaPP < -1) insight = `O canal <strong>direto</strong> perde <span class="neg">${directDeltaPP.toFixed(1).replace('.',',')} pontos</span> de quota face a 2025.`;
-    else insight = `Distribuição de canais estável face a 2025, com <strong>${direct.label}</strong> a manter-se em ${fmt.pct(direct.share, 0)}.`;
+  if (L === 'pt') {
+    insight = `Os canais próprios (<strong>website + reservas diretas</strong>) representam <span class="pos">${fmt.pct(ownDirect, 0)}</span> do volume YTD, à frente das plataformas online com ${fmt.pct(ids.share, 0)}, sinal saudável para a margem.`;
   } else {
-    if (directDeltaPP > 1) insight = `<strong>Direct</strong> gains <span class="pos">+${directDeltaPP.toFixed(1)} points</span> of share vs 2025, good news for the margin.`;
-    else if (directDeltaPP < -1) insight = `<strong>Direct</strong> loses <span class="neg">${directDeltaPP.toFixed(1)} points</span> of share vs 2025.`;
-    else insight = `Channel distribution steady vs 2025, with <strong>${direct.label}</strong> holding at ${fmt.pct(direct.share, 0)}.`;
+    insight = `Owned channels (<strong>website + direct</strong>) represent <span class="pos">${fmt.pct(ownDirect, 0)}</span> of YTD volume, ahead of online platforms at ${fmt.pct(ids.share, 0)}, a healthy sign for the margin.`;
   }
   document.getElementById('seg-insight').innerHTML = insight;
 }
 
 function renderMarkets() {
-  // Aggregate last 7 days
-  let totals = {}, prevs = {};
-  for (let i = 0; i < 7; i++) {
-    const d = dayData(addDays(CFG.todayISO, -i));
-    const p = dayData(addDays(stlyAnchor(CFG.todayISO), -i));
-    for (const mk of MARKETS) {
-      totals[mk.code] = (totals[mk.code] ?? 0) + d.roomsSold * d.marketShare[mk.code];
-      prevs[mk.code]  = (prevs[mk.code]  ?? 0) + p.roomsSold * p.marketShare[mk.code];
-    }
-  }
-  const sumNow = Object.values(totals).reduce((s,v) => s + v, 0);
-  const rows = MARKETS.map(mk => ({
-    code: mk.code,
-    label: mk.label[state.lang],
-    sub: mk.code,
-    share: totals[mk.code] / sumNow,
-    nowAbs: totals[mk.code],
-    prevAbs: prevs[mk.code],
-    delta: pct(totals[mk.code], prevs[mk.code]),
-  })).sort((a,b) => b.share - a.share).slice(0, 6);
+  // Use REAL_DATA top countries YTD 2026
+  const L = state.lang;
+  const totalRooms = REAL_DATA.topCountries.reduce((s,c) => s + c.rooms, 0);
+  const rows = REAL_DATA.topCountries
+    .map(c => ({ ...c, share: c.rooms / totalRooms }))
+    .sort((a,b) => b.rooms - a.rooms)
+    .slice(0, 6);
 
   const maxShare = rows[0].share;
   const list = document.getElementById('mkt-list');
-  list.innerHTML = rows.map(r => {
-    const klass = Math.abs(r.delta) < 0.01 ? 'flat' : (r.delta >= 0 ? 'pos' : 'neg');
-    return `
-      <div class="seg-row">
-        <div class="seg-name">${r.label}<span class="sub">${r.sub}, ${state.lang === 'pt' ? 'últimos 7 dias' : 'last 7 days'}</span></div>
-        <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
-        <div class="seg-val">${fmt.int(r.nowAbs)}<span class="pct ${klass}">${fmt.pctSign(r.delta, 0)}</span></div>
-      </div>
-    `;
-  }).join('');
+  list.innerHTML = rows.map(r => `
+    <div class="seg-row">
+      <div class="seg-name">${r.name[L]}<span class="sub">${r.code}, ${L === 'pt' ? 'YTD 2026' : 'YTD 2026'}</span></div>
+      <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
+      <div class="seg-val">${fmt.int(r.rooms)}<span class="pct">${fmt.pct(r.share, 0)}</span></div>
+    </div>
+  `).join('');
 
-  const movers = rows.slice().sort((a,b) => b.delta - a.delta);
-  const top = movers[0]; const bottom = movers[movers.length - 1];
+  const top = rows[0];
+  const second = rows[1];
+  const us = rows.find(r => r.code === 'US');
   let insight;
-  if (state.lang === 'pt') {
-    insight = `<strong>${top.label}</strong> lidera as novas reservas com <span class="${top.delta >= 0 ? 'pos' : 'neg'}">${fmt.pctSign(top.delta, 0)}</span> face a 2025. <strong>${bottom.label}</strong> ${bottom.delta >= 0 ? `cresce ${fmt.pctSign(bottom.delta, 0)}, ainda que de forma mais discreta` : `recua <span class="neg">${fmt.pctSign(bottom.delta, 0)}</span> e merece atenção`}.`;
+  if (L === 'pt') {
+    insight = `<strong>${top.name.pt}</strong> lidera o ranking com ${fmt.int(top.rooms)} quartos vendidos no ano, seguido da <strong>${second.name.pt}</strong> com ${fmt.int(second.rooms)}. O mercado <strong>americano</strong>, em terceiro, traz ${fmt.int(us.rooms)} quartos, um sinal forte de premium.`;
   } else {
-    insight = `<strong>${top.label}</strong> leads new bookings at <span class="${top.delta >= 0 ? 'pos' : 'neg'}">${fmt.pctSign(top.delta, 0)}</span> vs 2025. <strong>${bottom.label}</strong> ${bottom.delta >= 0 ? `is up ${fmt.pctSign(bottom.delta, 0)}, though more modestly` : `is down <span class="neg">${fmt.pctSign(bottom.delta, 0)}</span> and warrants attention`}.`;
+    insight = `<strong>${top.name.en}</strong> leads the ranking with ${fmt.int(top.rooms)} rooms sold this year, followed by <strong>${second.name.en}</strong> with ${fmt.int(second.rooms)}. The <strong>American</strong> market, in third, brings ${fmt.int(us.rooms)} rooms, a strong premium signal.`;
   }
   document.getElementById('mkt-insight').innerHTML = insight;
 }
@@ -3123,8 +3361,8 @@ function closeDrill() {
 function renderSectionMeta() {
   const k = computeKPIs();
   const txt = state.lang === 'pt'
-    ? `Atualizado às ${formatTimeNow()}`
-    : `Updated at ${formatTimeNow()}`;
+    ? `Opera, 28 Mai 2026 · 2025 estimado`
+    : `Opera, 28 May 2026 · 2025 estimated`;
   document.getElementById('kpi-meta').textContent = txt;
 }
 function formatTimeNow() {
@@ -3147,6 +3385,7 @@ function showView(name) {
   if (name === 'week')    renderWeekView();
   if (name === 'month')   renderMonthView();
   if (name === 'pace')    renderPaceView();
+  if (name === 'digital') renderDigitalView();
   if (name === 'sources') renderSourcesView();
   savePrefs();
 }
@@ -3506,23 +3745,24 @@ function renderWeekView() {
     `;
   }).join('');
 
-  const campaignsHTML = CAMPAIGNS.map(c => {
-    const spendPct = c.budget ? Math.min(100, (c.spend / c.budget) * 100) : 0;
+  // Use real campaigns from REAL_DATA (mix of Google Ads + Meta Ads), top 8 by revenue
+  const realCampaigns = REAL_DATA.campaigns.slice().sort((a,b) => b.revenue - a.revenue).slice(0, 8);
+  const campaignsHTML = realCampaigns.map(c => {
     const roas = c.spend > 0 ? c.revenue / c.spend : null;
+    const roasKlass = roas >= 10 ? 'pos' : (roas >= 3 ? '' : 'neg');
     return `
       <div class="campaign-row">
         <div class="campaign-name">
           <span class="n">${c.name[L]}</span>
-          <span class="meta">${isoToDayMonth(c.start)} → ${isoToDayMonth(c.end)}</span>
+          <span class="meta">${c.platform} · ${L === 'pt' ? 'Maio 2026' : 'May 2026'}</span>
         </div>
         <div class="campaign-platform">
-          ${c.platform}
-          <span class="audience">${c.audience[L]}</span>
+          ${c.audience[L]}
+          <span class="audience">${fmt.int(c.impressions)} ${L === 'pt' ? 'impressões' : 'impressions'} · ${fmt.int(c.clicks)} ${L === 'pt' ? 'cliques' : 'clicks'}</span>
         </div>
         <div class="campaign-budget">
           ${fmt.money(c.spend, 0)}
-          <span class="sub">${L === 'pt' ? 'de' : 'of'} ${fmt.money(c.budget, 0)}</span>
-          <div class="campaign-progress"><div class="campaign-progress-fill" style="width: ${spendPct.toFixed(0)}%"></div></div>
+          <span class="sub">${L === 'pt' ? 'gasto' : 'spend'}</span>
         </div>
         <div class="campaign-conv">
           ${fmt.int(c.conversions)}
@@ -3530,7 +3770,7 @@ function renderWeekView() {
         </div>
         <div class="campaign-rev">
           ${fmt.moneyShort(c.revenue)}
-          <span class="sub">${roas ? (L === 'pt' ? `retorno ${roas.toFixed(1)}x` : `${roas.toFixed(1)}x return`) : (L === 'pt' ? 'sem custo' : 'no cost')}</span>
+          <span class="sub ${roasKlass}">${roas ? `${roas.toFixed(1)}x ${L === 'pt' ? 'retorno' : 'return'}` : '—'}</span>
         </div>
       </div>
     `;
@@ -3883,6 +4123,142 @@ function renderPaceCurveChart(p) {
   });
 }
 
+/* ───────── Render: Digital Pulse ───────── */
+function renderDigitalView() {
+  const target = document.getElementById('view-digital-content');
+  if (!target) return;
+  const L = state.lang;
+  const ga = REAL_DATA.ga4;
+  const pm = REAL_DATA.paidMedia;
+
+  const totalSpend = pm.google.spend + pm.meta.spend;
+  const totalPaidRevenue = pm.google.revenue + pm.meta.revenue;
+  const blendedRoas = totalPaidRevenue / totalSpend;
+
+  // Editorial story
+  const paidShareOfTraffic = (ga.channels[0].sessions + ga.channels.find(c => c.code === 'paid_social').sessions) / ga.totalSessions;
+  const topChannel = ga.channels[0]; // Paid Search
+
+  let headline, body;
+  if (L === 'pt') {
+    headline = `O motor digital traz <em>${fmt.pct(paidShareOfTraffic, 0)} do tráfego</em> e devolve mais do que <em>17 vezes o investimento</em>.`;
+    body = `Nos primeiros cinco meses de 2026, ${fmt.int(ga.totalSessions)} sessões passaram pelo site, com <strong>${topChannel.name[L]}</strong> a liderar com ${fmt.int(topChannel.sessions)} visitas e ${fmt.moneyShort(topChannel.revenue)} de receita atribuída. O paid media gastou <strong>${fmt.moneyShort(totalSpend)}</strong> e devolveu <strong>${fmt.moneyShort(totalPaidRevenue)}</strong>, um retorno combinado de <span class="pos">${blendedRoas.toFixed(1)}x</span>. O Google Ads sozinho está em ${pm.google.roas.toFixed(1)}x, com a Suíça e os EUA a destacarem-se com retornos absurdos. O Meta, ainda que com retorno mais modesto a 3,5x na conta global, alimenta o topo do funil e mantém a marca presente.`;
+  } else {
+    headline = `The digital engine drives <em>${fmt.pct(paidShareOfTraffic, 0)} of traffic</em> and returns more than <em>17 times the investment</em>.`;
+    body = `Across the first five months of 2026, ${fmt.int(ga.totalSessions)} sessions visited the site, with <strong>${topChannel.name[L]}</strong> leading at ${fmt.int(topChannel.sessions)} visits and ${fmt.moneyShort(topChannel.revenue)} in attributed revenue. Paid media invested <strong>${fmt.moneyShort(totalSpend)}</strong> and returned <strong>${fmt.moneyShort(totalPaidRevenue)}</strong>, a blended return of <span class="pos">${blendedRoas.toFixed(1)}x</span>. Google Ads alone sits at ${pm.google.roas.toFixed(1)}x, with Switzerland and the US standing out with extraordinary returns. Meta, though more modest at 3.5x on the global account, feeds the top of the funnel and keeps the brand visible.`;
+  }
+
+  // GA4 channels list
+  const maxSess = ga.channels[0].sessions;
+  const channelsHTML = ga.channels.slice(0, 8).map((c, i) => {
+    const colors = ['var(--tierra)','var(--gold)','var(--moss)','var(--sky)','var(--ink-3)','var(--ink-3)','var(--ink-3)','var(--ink-3)'];
+    return `
+      <div class="seg-row">
+        <div class="seg-name">${c.name[L]}<span class="sub">${fmt.pct(c.convRate, 0)} ${L === 'pt' ? 'taxa de conversão' : 'conversion rate'}</span></div>
+        <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(c.sessions / maxSess * 100).toFixed(1)}%; background: ${colors[i]}"></div></div>
+        <div class="seg-val">${fmt.int(c.sessions)}<span class="pct">${fmt.moneyShort(c.revenue)}</span></div>
+      </div>
+    `;
+  }).join('');
+
+  // Paid media platforms summary
+  const platformsHTML = `
+    <div class="pace-horizons" style="grid-template-columns: 1fr 1fr;">
+      <div class="pace-h">
+        <span class="head">Google Ads, ${L === 'pt' ? 'Maio' : 'May'}</span>
+        <span class="v">${pm.google.roas.toFixed(1)}<span class="unit">x ROAS</span></span>
+        <span class="d pos">${fmt.moneyShort(pm.google.spend)} ${L === 'pt' ? 'gasto' : 'spend'} → ${fmt.moneyShort(pm.google.revenue)} ${L === 'pt' ? 'receita' : 'revenue'}</span>
+      </div>
+      <div class="pace-h">
+        <span class="head">Meta Ads, ${L === 'pt' ? 'Maio' : 'May'}</span>
+        <span class="v">${pm.meta.roas.toFixed(1)}<span class="unit">x ROAS</span></span>
+        <span class="d pos">${fmt.moneyShort(pm.meta.spend)} ${L === 'pt' ? 'gasto' : 'spend'} → ${fmt.moneyShort(pm.meta.revenue)} ${L === 'pt' ? 'receita' : 'revenue'}</span>
+      </div>
+    </div>
+  `;
+
+  // Hero KPIs for digital
+  const heroKPIs = `
+    <div class="kpi-grid">
+      <div class="kpi" style="cursor: default;">
+        <div class="kpi-eyebrow"><span>${L === 'pt' ? 'Sessões totais' : 'Total sessions'}</span></div>
+        <div class="kpi-value tabular">${fmt.int(ga.totalSessions)}</div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'YTD 2026' : 'YTD 2026'}</span><span class="value">${L === 'pt' ? 'Jan a Maio' : 'Jan to May'}</span></div>
+        </div>
+      </div>
+      <div class="kpi" style="cursor: default;">
+        <div class="kpi-eyebrow"><span>${L === 'pt' ? 'Receita atribuída GA4' : 'GA4 attributed revenue'}</span></div>
+        <div class="kpi-value tabular">${fmt.moneyShort(ga.totalRevenue)}</div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'Por sessão' : 'Per session'}</span><span class="value">${fmt.money(ga.totalRevenue / ga.totalSessions, 2)}</span></div>
+        </div>
+      </div>
+      <div class="kpi" style="cursor: default;">
+        <div class="kpi-eyebrow"><span>${L === 'pt' ? 'Gasto em paid media' : 'Paid media spend'}</span></div>
+        <div class="kpi-value tabular">${fmt.moneyShort(totalSpend)}</div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'Google + Meta, Maio' : 'Google + Meta, May'}</span><span class="value">${fmt.int(pm.google.conversions + pm.meta.conversions)} ${L === 'pt' ? 'reservas' : 'bookings'}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  target.innerHTML = `
+    <article class="story rise d1">
+      <div class="story-eyebrow">
+        <span class="badge"><span class="dot"></span>${L === 'pt' ? 'Pulso digital' : 'Digital pulse'}</span>
+        <span class="sep">·</span>
+        <span class="meta">GA4 + Google Ads + Meta Ads · YTD 2026</span>
+      </div>
+      <h1 class="story-headline">${headline}</h1>
+      <p class="story-body">${body}</p>
+      <div class="story-foot">
+        <div class="story-tag"><span>${L === 'pt' ? 'Sessões' : 'Sessions'}</span><span class="v">${fmt.int(ga.totalSessions)}</span></div>
+        <div class="story-tag"><span>${L === 'pt' ? 'Receita atribuída' : 'Attributed revenue'}</span><span class="v">${fmt.moneyShort(ga.totalRevenue)}</span></div>
+        <div class="story-tag"><span>${L === 'pt' ? 'ROAS combinado' : 'Blended ROAS'}</span><span class="v pos">${blendedRoas.toFixed(1)}x</span></div>
+      </div>
+    </article>
+
+    <section class="section rise d2">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo I' : 'Chapter I'}</div>
+          <h2>${L === 'pt' ? 'O ' : 'The '}<em>${L === 'pt' ? 'tráfego' : 'traffic'}</em>${L === 'pt' ? ', em síntese' : ', in brief'}</h2>
+          <p class="dek">${L === 'pt' ? 'Três indicadores que definem o estado digital do resort.' : 'Three indicators that define the resort\'s digital state.'}</p>
+        </div>
+      </div>
+      ${heroKPIs}
+    </section>
+
+    <section class="section rise d3">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo II' : 'Chapter II'}</div>
+          <h2>${L === 'pt' ? 'De onde vêm os ' : 'Where the '}<em>${L === 'pt' ? 'visitantes' : 'visitors'}</em>${L === 'pt' ? '' : ' come from'}</h2>
+          <p class="dek">${L === 'pt' ? 'Os oito canais que trazem mais tráfego ao site, com receita atribuída e taxa de conversão.' : 'The eight channels that drive most traffic to the site, with attributed revenue and conversion rate.'}</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <div class="seg-list">${channelsHTML}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section rise d4">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo III' : 'Chapter III'}</div>
+          <h2>${L === 'pt' ? 'Retorno por ' : 'Return by '}<em>${L === 'pt' ? 'plataforma' : 'platform'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'O que cada plataforma está a gastar e o que devolve em receita atribuída.' : 'What each platform is spending and what it returns in attributed revenue.'}</p>
+        </div>
+      </div>
+      ${platformsHTML}
+    </section>
+  `;
+}
+
 /* ───────── Render: Sources (uploads) ───────── */
 const SOURCE_TYPES = [
   { key: 'opera_production', label: { pt: 'Production Report', en: 'Production Report' }, desc: { pt: 'Receita por segmento, canal e source do Opera.', en: 'Revenue by segment, channel and source from Opera.' }, accept: '.html,.htm,.xlsx,.xls,.csv' },
@@ -4084,6 +4460,7 @@ function boot() {
   document.body.dataset.theme = state.theme;
   document.body.dataset.lang = state.lang;
   state.data = generateData();
+  applyRealData(); // overlay Opera-derived values for 2026 dates
   wireEvents();
   // Wait for Chart.js to load (defer)
   if (typeof Chart === 'undefined') {
