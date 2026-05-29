@@ -1548,7 +1548,7 @@ const CFG = {
   todayISO: '2026-05-28', // matches Opera export "today"
   rooms: 187, // physical capacity inferred from Opera forecast (104 rooms / 55.6% occ)
   resort: 'Vilalara Thalassa Resort',
-  hasReal2025: false, // we don't have 2025 historical; YoY uses estimated baseline
+  hasReal2025: true, // real 2025 data loaded from Opera + GA4 exports
 };
 
 // MARKETS — real top 10 countries YTD 2026 from Opera Country by Day report
@@ -1809,8 +1809,146 @@ const REAL_DATA = {
   // Aggregated paid media totals
   paidMedia: {
     google: { spend: 12462, conversions: 73, revenue: 222309, roas: 17.8 },
-    meta:   { spend: 8783,  conversions: 49, revenue: 120511, roas: 13.7 }, // Meta visible campaigns sum (total acct €34k is the wider window)
+    meta:   { spend: 8783,  conversions: 49, revenue: 120511, roas: 13.7 },
     metaAccount: { spend: 34240, clicks: 11890, revenue: 120510, ctr: 0.030 },
+  },
+
+  // ── 2025 YTD baselines (Jan 1 to May 28, 2025) for real YoY comparisons ──
+  ytd2025: {
+    rooms: 5025,
+    revenue: 1626477,
+    availableRooms: 12811,
+    occupancy: 0.3922,
+    adr: 323.68,
+  },
+
+  // 2025 top countries (same YTD period)
+  topCountries2025: [
+    { code: 'PT', rooms: 1099 },
+    { code: 'GB', rooms: 862  },
+    { code: 'US', rooms: 830  },
+    { code: 'DE', rooms: 799  },
+    { code: 'CH', rooms: 389  },
+    { code: 'FR', rooms: 266  },
+    { code: 'ES', rooms: 250  },
+    { code: 'NL', rooms: 210  },
+    { code: 'BE', rooms: 197  },
+    { code: 'IE', rooms: 169  },
+    { code: 'CA', rooms: 120  },
+    { code: 'LU', rooms: 95   },
+    { code: 'AT', rooms: 73   },
+    { code: 'IT', rooms: 68   },
+    { code: 'PL', rooms: 37   },
+  ],
+
+  // 2025 channel breakdown
+  channelBreakdown2025: [
+    { code: 'website', rooms: 1515 },
+    { code: 'to',      rooms: 1001 },
+    { code: 'ids',     rooms: 904  },
+    { code: 'direct',  rooms: 875  },
+    { code: 'other',   rooms: 509  },
+    { code: 'ta',      rooms: 94   },
+    { code: 'owner',   rooms: 72   },
+    { code: 'famtrip', rooms: 40   },
+    { code: 'walkin',  rooms: 13   },
+    { code: 'corp',    rooms: 2    },
+  ],
+
+  // GA4 traffic 2025 (Jan 1 to May 28)
+  ga42025: {
+    totalSessions: 226262,
+    totalRevenue: 3139594,
+    channels: [
+      { code: 'paid_social',    sessions: 77630, revenue: 16286   },
+      { code: 'paid_search',    sessions: 38314, revenue: 1039192 },
+      { code: 'organic_search', sessions: 34645, revenue: 1232476 },
+      { code: 'direct',         sessions: 26743, revenue: 346818  },
+      { code: 'organic_social', sessions: 19644, revenue: 67500   },
+      { code: 'display',        sessions: 10254, revenue: 0       },
+      { code: 'referral',       sessions: 10241, revenue: 345631  },
+      { code: 'email',          sessions: 7626,  revenue: 93551   },
+      { code: 'unassigned',     sessions: 1081,  revenue: 15900   },
+      { code: 'cross_network',  sessions: 84,    revenue: 2243    },
+    ],
+  },
+
+  // ── FULL YEAR 2026 OTB snapshot (from "Vilalara All Sources OTB 2026 - 25 May" Excel) ──
+  fullYear2026: {
+    asOf: '2026-05-25',
+    rooms: 17997, adr: 463, revenue: 8340527,
+    occOTB: 0.48, occBudget: 0.64,
+    stly: { rooms: 14878, adr: 508, revenue: 7556662 }, // same time last year, 26 May 2025
+    yoy: { rooms: 0.21, adr: -0.09, revenue: 0.10 },
+    weeklyPickup: 534, // last week's room nights added
+    channels: { // Full year OTB by commercial channel
+      direct:    { rms: 8641, adr: 511, rev: 4415235, share: 0.480 },
+      online:    { rms: 4802, adr: 434, rev: 2081747, share: 0.267 },
+      offline:   { rms: 4115, adr: 413, rev: 1700827, share: 0.229 },
+      corpOther: { rms:   31, adr: 552, rev:   17119, share: 0.002 },
+      mice:      { rms:  408, adr: 308, rev:  125599, share: 0.023 },
+    },
+  },
+
+  // Monthly OTB vs Budget vs Same Time Last Year, 2026 (stay months)
+  monthlyOTB: [
+    { m: 'JAN', rms: 0,    adr: 0,   rev: 0,       stlyRms: 0,    stlyRev: 0,       occOTB: 0,    occBgt: 0    },
+    { m: 'FEB', rms: 384,  adr: 185, rev: 70993,   stlyRms: 0,    stlyRev: 0,       occOTB: 0.10, occBgt: 0.09 },
+    { m: 'MAR', rms: 1769, adr: 184, rev: 324724,  stlyRms: 0,    stlyRev: 0,       occOTB: 0.44, occBgt: 0.39 },
+    { m: 'APR', rms: 2656, adr: 331, rev: 879952,  stlyRms: 2220, stlyRev: 765576,  occOTB: 0.70, occBgt: 0.62 },
+    { m: 'MAY', rms: 2792, adr: 408, rev: 1139934, stlyRms: 2479, stlyRev: 986280,  occOTB: 0.69, occBgt: 0.67 },
+    { m: 'JUN', rms: 2881, adr: 490, rev: 1410265, stlyRms: 2780, stlyRev: 1414262, occOTB: 0.73, occBgt: 0.80 },
+    { m: 'JUL', rms: 3047, adr: 625, rev: 1903560, stlyRms: 2932, stlyRev: 1834385, occOTB: 0.75, occBgt: 0.85 },
+    { m: 'AUG', rms: 2487, adr: 693, rev: 1724176, stlyRms: 2396, stlyRev: 1669982, occOTB: 0.61, occBgt: 0.87 },
+    { m: 'SEP', rms: 1314, adr: 488, rev: 641755,  stlyRms: 1359, stlyRev: 652497,  occOTB: 0.33, occBgt: 0.80 },
+    { m: 'OCT', rms: 568,  adr: 398, rev: 225817,  stlyRms: 616,  stlyRev: 212353,  occOTB: 0.14, occBgt: 0.75 },
+    { m: 'NOV', rms: 99,   adr: 195, rev: 19351,   stlyRms: 96,   stlyRev: 21328,   occOTB: 0.05, occBgt: 0.54 },
+    { m: 'DEC', rms: 0,    adr: 0,   rev: 0,       stlyRms: 0,    stlyRev: 0,       occOTB: 0,    occBgt: 0    },
+  ],
+
+  // Weekly booking pace (rooms on the books each week)
+  bookingPace: [
+    { week: '27 Apr', otb: 15323, adr: 445, rev: 6818956 },
+    { week: '04 Mai', otb: 16048, adr: 449, rev: 7207373 },
+    { week: '11 Mai', otb: 16654, adr: 453, rev: 7546174 },
+    { week: '18 Mai', otb: 17463, adr: 459, rev: 8008650 },
+    { week: '25 Mai', otb: 17997, adr: 463, rev: 8340527 },
+  ],
+
+  // Daily room nights 2025 (Jan 1 to May 28) — from Country by Day 2025 export
+  dailyRooms2025: {
+    '2025-01-01': 5,  '2025-01-02': 3,  '2025-01-03': 3,  '2025-01-04': 3,  '2025-01-05': 3,
+    '2025-01-06': 1,  '2025-01-07': 4,  '2025-01-08': 3,  '2025-01-09': 3,  '2025-01-10': 3,
+    '2025-01-11': 3,  '2025-01-12': 3,  '2025-01-13': 4,  '2025-01-14': 8,  '2025-01-15': 6,
+    '2025-01-16': 3,  '2025-01-17': 1,  '2025-01-18': 1,  '2025-01-19': 1,  '2025-01-20': 3,
+    '2025-01-21': 2,  '2025-01-22': 2,  '2025-01-23': 3,  '2025-01-24': 2,  '2025-01-25': 2,
+    '2025-01-26': 2,  '2025-01-27': 3,  '2025-01-28': 3,  '2025-01-29': 2,  '2025-01-30': 3,
+    '2025-01-31': 2,
+    '2025-02-01': 2,  '2025-02-02': 2,  '2025-02-03': 8,  '2025-02-04': 3,  '2025-02-05': 3,
+    '2025-02-06': 3,  '2025-02-07': 3,  '2025-02-08': 3,  '2025-02-09': 3,  '2025-02-10': 3,
+    '2025-02-11': 2,  '2025-02-12': 2,  '2025-02-13': 2,  '2025-02-14': 2,  '2025-02-15': 2,
+    '2025-02-16': 4,  '2025-02-17': 11, '2025-02-18': 4,  '2025-02-19': 4,  '2025-02-20': 4,
+    '2025-02-21': 4,  '2025-02-22': 4,  '2025-02-23': 4,  '2025-02-24': 5,  '2025-02-25': 4,
+    '2025-02-26': 4,  '2025-02-27': 4,  '2025-02-28': 5,
+    '2025-03-01': 5,  '2025-03-02': 5,  '2025-03-03': 11, '2025-03-04': 7,  '2025-03-05': 10,
+    '2025-03-06': 10, '2025-03-07': 7,  '2025-03-08': 7,  '2025-03-09': 6,  '2025-03-10': 7,
+    '2025-03-11': 7,  '2025-03-12': 7,  '2025-03-13': 6,  '2025-03-14': 7,  '2025-03-15': 7,
+    '2025-03-16': 8,  '2025-03-17': 10, '2025-03-18': 9,  '2025-03-19': 9,  '2025-03-20': 11,
+    '2025-03-21': 8,  '2025-03-22': 8,  '2025-03-23': 8,  '2025-03-24': 14, '2025-03-25': 14,
+    '2025-03-26': 12, '2025-03-27': 15, '2025-03-28': 13, '2025-03-29': 12, '2025-03-30': 12,
+    '2025-03-31': 16,
+    '2025-04-01': 16, '2025-04-02': 20, '2025-04-03': 34, '2025-04-04': 43, '2025-04-05': 52,
+    '2025-04-06': 70, '2025-04-07': 78, '2025-04-08': 83, '2025-04-09': 77, '2025-04-10': 77,
+    '2025-04-11': 71, '2025-04-12': 77, '2025-04-13': 85, '2025-04-14': 87, '2025-04-15': 99,
+    '2025-04-16': 111,'2025-04-17': 124,'2025-04-18': 130,'2025-04-19': 126,'2025-04-20': 117,
+    '2025-04-21': 110,'2025-04-22': 114,'2025-04-23': 107,'2025-04-24': 114,'2025-04-25': 123,
+    '2025-04-26': 122,'2025-04-27': 93, '2025-04-28': 89, '2025-04-29': 81, '2025-04-30': 85,
+    '2025-05-01': 90, '2025-05-02': 81, '2025-05-03': 79, '2025-05-04': 75, '2025-05-05': 73,
+    '2025-05-06': 71, '2025-05-07': 77, '2025-05-08': 81, '2025-05-09': 79, '2025-05-10': 77,
+    '2025-05-11': 61, '2025-05-12': 71, '2025-05-13': 81, '2025-05-14': 78, '2025-05-15': 112,
+    '2025-05-16': 100,'2025-05-17': 102,'2025-05-18': 90, '2025-05-19': 96, '2025-05-20': 104,
+    '2025-05-21': 118,'2025-05-22': 117,'2025-05-23': 130,'2025-05-24': 137,'2025-05-25': 134,
+    '2025-05-26': 123,'2025-05-27': 119,'2025-05-28': 125,
   },
 };
 
@@ -2227,7 +2365,7 @@ function generateData() {
   return { days, byISO: Object.fromEntries(days.map(d => [d.iso, d])) };
 }
 
-// Overlay REAL_DATA on top of synthetic days for 2026 dates we have actual numbers for.
+// Overlay REAL_DATA on top of synthetic days for 2025/2026 dates we have actual numbers for.
 function applyRealData() {
   if (!state.data) return;
   // Historical 2026 (rooms only, no daily revenue/ADR available)
@@ -2235,7 +2373,6 @@ function applyRealData() {
     if (state.data.byISO[iso]) {
       const rooms = REAL_DATA.dailyRooms[iso];
       const occ = rooms / CFG.rooms;
-      // For historical days without daily revenue, use YTD average ADR as proxy
       const adr = REAL_DATA.ytd.adr;
       const revenue = rooms * adr;
       Object.assign(state.data.byISO[iso], {
@@ -2254,6 +2391,20 @@ function applyRealData() {
         revpar: f.revenue / CFG.rooms,
         fcast: f.revenue,
         isReal: true, isForecast: true,
+      });
+    }
+  }
+  // 2025 historical (real data from Opera Country by Day 2025)
+  for (const iso in REAL_DATA.dailyRooms2025) {
+    if (state.data.byISO[iso]) {
+      const rooms = REAL_DATA.dailyRooms2025[iso];
+      const occ = rooms / CFG.rooms;
+      const adr = REAL_DATA.ytd2025.adr;
+      const revenue = rooms * adr;
+      Object.assign(state.data.byISO[iso], {
+        occ, adr, roomsSold: rooms, revenue,
+        revpar: revenue / CFG.rooms,
+        isReal: true, year: 2025,
       });
     }
   }
@@ -2777,66 +2928,84 @@ function renderKPIs() {
 
 /* ───────── 12. RENDER — segments & markets ───────── */
 function renderSegments() {
-  // Use REAL_DATA channel breakdown YTD 2026
   const L = state.lang;
   const totalRooms = REAL_DATA.channelBreakdown.reduce((s,c) => s + c.rooms, 0);
+  const total2025 = REAL_DATA.channelBreakdown2025.reduce((s,c) => s + c.rooms, 0);
+  const lyByCode = Object.fromEntries(REAL_DATA.channelBreakdown2025.map(c => [c.code, c.rooms]));
+
   const rows = REAL_DATA.channelBreakdown
-    .map(c => ({ ...c, share: c.rooms / totalRooms }))
+    .map(c => ({
+      ...c,
+      share: c.rooms / totalRooms,
+      ly: lyByCode[c.code] || 0,
+      yoyRooms: pct(c.rooms, lyByCode[c.code] || 0),
+    }))
     .sort((a,b) => b.share - a.share)
     .slice(0, 6);
 
   const maxShare = rows[0].share;
   const list = document.getElementById('seg-list');
-  list.innerHTML = rows.map(r => `
-    <div class="seg-row">
-      <div class="seg-name">${r.name[L]}<span class="sub">${fmt.int(r.rooms)} ${L === 'pt' ? 'quartos YTD' : 'rooms YTD'}</span></div>
-      <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
-      <div class="seg-val">${fmt.pct(r.share, 0)}<span class="pct">${L === 'pt' ? '2026' : '2026'}</span></div>
-    </div>
-  `).join('');
+  list.innerHTML = rows.map(r => {
+    const klass = r.ly === 0 ? 'flat' : (r.yoyRooms > 0 ? 'pos' : 'neg');
+    const yoyText = r.ly === 0 ? '—' : fmt.pctSign(r.yoyRooms, 0);
+    return `
+      <div class="seg-row">
+        <div class="seg-name">${r.name[L]}<span class="sub">${fmt.int(r.rooms)} ${L === 'pt' ? 'quartos YTD' : 'rooms YTD'}</span></div>
+        <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
+        <div class="seg-val">${fmt.pct(r.share, 0)}<span class="pct ${klass}">${yoyText} ${L === 'pt' ? 'vs 2025' : 'vs 2025'}</span></div>
+      </div>
+    `;
+  }).join('');
 
-  // Editorial insight from real data
   const website = rows.find(r => r.code === 'website');
-  const direct  = rows.find(r => r.code === 'direct');
   const ids     = rows.find(r => r.code === 'ids');
-  const ownDirect = (website.rooms + direct.rooms) / totalRooms;
-
+  const to      = rows.find(r => r.code === 'to');
   let insight;
   if (L === 'pt') {
-    insight = `Os canais próprios (<strong>website + reservas diretas</strong>) representam <span class="pos">${fmt.pct(ownDirect, 0)}</span> do volume YTD, à frente das plataformas online com ${fmt.pct(ids.share, 0)}, sinal saudável para a margem.`;
+    insight = `As <strong>plataformas online</strong> são quem mais cresce face a 2025, com <span class="pos">${fmt.pctSign(ids.yoyRooms, 0)}</span>. O <strong>website direto</strong> também acelera <span class="pos">${fmt.pctSign(website.yoyRooms, 0)}</span> e mantém a liderança no mix.`;
   } else {
-    insight = `Owned channels (<strong>website + direct</strong>) represent <span class="pos">${fmt.pct(ownDirect, 0)}</span> of YTD volume, ahead of online platforms at ${fmt.pct(ids.share, 0)}, a healthy sign for the margin.`;
+    insight = `<strong>Online platforms</strong> grow the fastest vs 2025, at <span class="pos">${fmt.pctSign(ids.yoyRooms, 0)}</span>. The <strong>direct website</strong> also accelerates by <span class="pos">${fmt.pctSign(website.yoyRooms, 0)}</span> and holds its lead in the mix.`;
   }
   document.getElementById('seg-insight').innerHTML = insight;
 }
 
 function renderMarkets() {
-  // Use REAL_DATA top countries YTD 2026
   const L = state.lang;
+  const lyByCode = Object.fromEntries(REAL_DATA.topCountries2025.map(c => [c.code, c.rooms]));
   const totalRooms = REAL_DATA.topCountries.reduce((s,c) => s + c.rooms, 0);
   const rows = REAL_DATA.topCountries
-    .map(c => ({ ...c, share: c.rooms / totalRooms }))
+    .map(c => ({
+      ...c,
+      share: c.rooms / totalRooms,
+      ly: lyByCode[c.code] || 0,
+      yoy: pct(c.rooms, lyByCode[c.code] || 0),
+    }))
     .sort((a,b) => b.rooms - a.rooms)
     .slice(0, 6);
 
   const maxShare = rows[0].share;
   const list = document.getElementById('mkt-list');
-  list.innerHTML = rows.map(r => `
-    <div class="seg-row">
-      <div class="seg-name">${r.name[L]}<span class="sub">${r.code}, ${L === 'pt' ? 'YTD 2026' : 'YTD 2026'}</span></div>
-      <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
-      <div class="seg-val">${fmt.int(r.rooms)}<span class="pct">${fmt.pct(r.share, 0)}</span></div>
-    </div>
-  `).join('');
+  list.innerHTML = rows.map(r => {
+    const klass = r.ly === 0 ? 'flat' : (r.yoy > 0 ? 'pos' : 'neg');
+    return `
+      <div class="seg-row">
+        <div class="seg-name">${r.name[L]}<span class="sub">${r.code}, ${L === 'pt' ? `${r.ly} em 2025` : `${r.ly} in 2025`}</span></div>
+        <div class="seg-bar"><div class="seg-bar-fill" style="width: ${(r.share / maxShare * 100).toFixed(1)}%"></div></div>
+        <div class="seg-val">${fmt.int(r.rooms)}<span class="pct ${klass}">${fmt.pctSign(r.yoy, 0)}</span></div>
+      </div>
+    `;
+  }).join('');
 
+  // Find Portugal in current rank (PT was #1 in 2025, now likely lower)
+  const ptRank2026 = REAL_DATA.topCountries.findIndex(c => c.code === 'PT') + 1;
+  const pt = REAL_DATA.topCountries.find(c => c.code === 'PT');
+  const ptLy = lyByCode['PT'];
   const top = rows[0];
-  const second = rows[1];
-  const us = rows.find(r => r.code === 'US');
   let insight;
   if (L === 'pt') {
-    insight = `<strong>${top.name.pt}</strong> lidera o ranking com ${fmt.int(top.rooms)} quartos vendidos no ano, seguido da <strong>${second.name.pt}</strong> com ${fmt.int(second.rooms)}. O mercado <strong>americano</strong>, em terceiro, traz ${fmt.int(us.rooms)} quartos, um sinal forte de premium.`;
+    insight = `<strong>${top.name.pt}</strong> assume a liderança em 2026 com <span class="pos">${fmt.pctSign(top.yoy, 0)}</span> face ao ano passado. O mercado <strong>português</strong>, que liderava em 2025 com ${ptLy} quartos, desceu para a ${ptRank2026}.ª posição com <span class="neg">${fmt.pctSign(pct(pt.rooms, ptLy), 0)}</span>, sinal de internacionalização acelerada.`;
   } else {
-    insight = `<strong>${top.name.en}</strong> leads the ranking with ${fmt.int(top.rooms)} rooms sold this year, followed by <strong>${second.name.en}</strong> with ${fmt.int(second.rooms)}. The <strong>American</strong> market, in third, brings ${fmt.int(us.rooms)} rooms, a strong premium signal.`;
+    insight = `<strong>${top.name.en}</strong> takes the lead in 2026 with <span class="pos">${fmt.pctSign(top.yoy, 0)}</span> vs last year. The <strong>Portuguese</strong> market, which led in 2025 with ${ptLy} rooms, dropped to position #${ptRank2026} with <span class="neg">${fmt.pctSign(pct(pt.rooms, ptLy), 0)}</span>, a sign of accelerating internationalisation.`;
   }
   document.getElementById('mkt-insight').innerHTML = insight;
 }
@@ -3361,8 +3530,8 @@ function closeDrill() {
 function renderSectionMeta() {
   const k = computeKPIs();
   const txt = state.lang === 'pt'
-    ? `Opera, 28 Mai 2026 · 2025 estimado`
-    : `Opera, 28 May 2026 · 2025 estimated`;
+    ? `Opera + GA4, 28 Mai 2026 · 2025 real`
+    : `Opera + GA4, 28 May 2026 · 2025 real`;
   document.getElementById('kpi-meta').textContent = txt;
 }
 function formatTimeNow() {
@@ -3831,8 +4000,227 @@ function renderWeekView() {
   `;
 }
 
-/* ───────── Render: The Month ───────── */
+/* ───────── Render: The Month (full year OTB pace) ───────── */
 function renderMonthView() {
+  const target = document.getElementById('view-month-content');
+  if (!target) return;
+  const L = state.lang;
+  const fy = REAL_DATA.fullYear2026;
+  const months = REAL_DATA.monthlyOTB;
+  const monthsLabel = I18N[L].months;
+
+  // Story
+  const yoyRevPct = fy.yoy.revenue;
+  const yoyRoomsPct = fy.yoy.rooms;
+  const occGap = (fy.occBudget - fy.occOTB) * 100; // points to budget
+
+  // Identify risk months (largest gap to budget)
+  const riskMonths = months
+    .filter(m => m.occBgt > 0 && m.occOTB > 0 && (m.occBgt - m.occOTB) > 0.1 && ['JUN','JUL','AUG','SEP','OCT'].includes(m.m))
+    .map(m => ({ ...m, gap: (m.occBgt - m.occOTB) * 100 }))
+    .sort((a,b) => b.gap - a.gap);
+
+  const monthFullName = { JAN:'janeiro', FEB:'fevereiro', MAR:'março', APR:'abril', MAY:'maio', JUN:'junho', JUL:'julho', AUG:'agosto', SEP:'setembro', OCT:'outubro', NOV:'novembro', DEC:'dezembro' };
+  const monthFullEn   = { JAN:'January',FEB:'February',MAR:'March',APR:'April',MAY:'May',JUN:'June',JUL:'July',AUG:'August',SEP:'September',OCT:'October',NOV:'November',DEC:'December' };
+
+  let headline, body;
+  if (L === 'pt') {
+    headline = `Ano inteiro de 2026 já vale <em>${fmt.moneyShort(fy.revenue)}</em> em receita confirmada, ${fmt.pctSign(yoyRevPct, 0)} face ao mesmo momento de 2025.`;
+    const r1 = riskMonths[0];
+    const r2 = riskMonths[1];
+    const riskText = r1 ? ` O sinal de alerta vem de <strong>${monthFullName[r1.m]}</strong>, com ${fmt.pct(r1.occOTB, 0)} de ocupação confirmada contra <strong>${fmt.pct(r1.occBgt, 0)}</strong> de orçamento, uma diferença de <span class="neg">${r1.gap.toFixed(0)} pontos</span> a fechar nas próximas semanas${r2 ? `, seguido de <strong>${monthFullName[r2.m]}</strong> com diferença de <span class="neg">${r2.gap.toFixed(0)} pontos</span>` : ''}.` : '';
+    body = `Em rooms nights, são <strong>${fmt.int(fy.rooms)}</strong> quartos reservados para todo o ano, <span class="pos">${fmt.pctSign(yoyRoomsPct, 0)}</span> mais do que estávamos em 2025 nesta altura. A tarifa média do livro fixa-se em <strong>${fmt.money(fy.adr, 0)}</strong>, ${yoyRevPct >= 0 ? `${fmt.pctSign(fy.yoy.adr, 0)} face a 2025 (a vender mais quartos a tarifa um pouco mais baixa)` : ''}. Olhando para o ano todo, a ocupação confirmada está nos <strong>${fmt.pct(fy.occOTB, 0)}</strong>, com o orçamento a apontar para <strong>${fmt.pct(fy.occBudget, 0)}</strong>, faltam <span class="neg">${occGap.toFixed(0)} pontos</span> para fechar.${riskText}`;
+  } else {
+    headline = `Full year 2026 already represents <em>${fmt.moneyShort(fy.revenue)}</em> in confirmed revenue, ${fmt.pctSign(yoyRevPct, 0)} versus the same moment in 2025.`;
+    const r1 = riskMonths[0];
+    const r2 = riskMonths[1];
+    const riskText = r1 ? ` The warning sign comes from <strong>${monthFullEn[r1.m]}</strong>, at ${fmt.pct(r1.occOTB, 0)} confirmed occupancy versus <strong>${fmt.pct(r1.occBgt, 0)}</strong> of budget, a gap of <span class="neg">${r1.gap.toFixed(0)} points</span> to close in the coming weeks${r2 ? `, followed by <strong>${monthFullEn[r2.m]}</strong> at <span class="neg">${r2.gap.toFixed(0)} points</span> behind` : ''}.` : '';
+    body = `In room nights, that's <strong>${fmt.int(fy.rooms)}</strong> rooms booked for the year, <span class="pos">${fmt.pctSign(yoyRoomsPct, 0)}</span> more than where we stood in 2025 at this time. Average rate on the books holds at <strong>${fmt.money(fy.adr, 0)}</strong>${yoyRevPct >= 0 ? `, ${fmt.pctSign(fy.yoy.adr, 0)} vs 2025 (selling more rooms at a slightly lower rate)` : ''}. Looking at the full year, confirmed occupancy sits at <strong>${fmt.pct(fy.occOTB, 0)}</strong>, with budget targeting <strong>${fmt.pct(fy.occBudget, 0)}</strong>, leaving <span class="neg">${occGap.toFixed(0)} points</span> to fill.${riskText}`;
+  }
+
+  // Hero KPIs for the full year
+  const heroKPIs = `
+    <div class="kpi-grid">
+      <div class="kpi" style="cursor: default;">
+        <div class="kpi-eyebrow"><span>${L === 'pt' ? 'Receita confirmada' : 'Confirmed revenue'}</span></div>
+        <div class="kpi-value tabular">${fmt.moneyShort(fy.revenue)}</div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'vs. 2025' : 'vs. 2025'}</span><span class="value pos">${fmt.pctSign(yoyRevPct, 0)}</span></div>
+        </div>
+      </div>
+      <div class="kpi" style="cursor: default;">
+        <div class="kpi-eyebrow"><span>${L === 'pt' ? 'Quartos reservados' : 'Rooms booked'}</span></div>
+        <div class="kpi-value tabular">${fmt.int(fy.rooms)}</div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'vs. 2025' : 'vs. 2025'}</span><span class="value pos">${fmt.pctSign(yoyRoomsPct, 0)}</span></div>
+        </div>
+      </div>
+      <div class="kpi" style="cursor: default;">
+        <div class="kpi-eyebrow"><span>${L === 'pt' ? 'Tarifa média no livro' : 'On-the-books average rate'}</span></div>
+        <div class="kpi-value tabular">${fmt.money(fy.adr, 0)}</div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'vs. 2025' : 'vs. 2025'}</span><span class="value neg">${fmt.pctSign(fy.yoy.adr, 0)}</span></div>
+        </div>
+      </div>
+      <div class="kpi" style="cursor: default;">
+        <div class="kpi-eyebrow"><span>${L === 'pt' ? 'Ocupação' : 'Occupancy'}</span></div>
+        <div class="kpi-value tabular">${(fy.occOTB * 100).toFixed(0)}<span class="unit">%</span></div>
+        <div class="kpi-deltas">
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'Orçamento' : 'Budget'}</span><span class="value">${(fy.occBudget * 100).toFixed(0)}%</span></div>
+          <div class="kpi-delta"><span class="label">${L === 'pt' ? 'Diferença' : 'Gap'}</span><span class="value neg">${(-occGap).toFixed(0)} ${L === 'pt' ? 'pontos' : 'points'}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Monthly table (OTB vs Budget vs STLY for each stay month)
+  const tableRows = months
+    .filter(m => m.rms > 0 || m.occBgt > 0)
+    .map(m => {
+      const yoyRms = m.stlyRms ? pct(m.rms, m.stlyRms) : null;
+      const yoyKlass = yoyRms === null ? 'flat' : (yoyRms > 0.03 ? 'pos' : (yoyRms < -0.03 ? 'neg' : 'flat'));
+      const budgetGap = m.occBgt > 0 ? (m.occOTB - m.occBgt) : null;
+      const budgetKlass = budgetGap === null ? 'flat' : (budgetGap >= 0 ? 'pos' : 'neg');
+      const monthLabel = L === 'pt' ? monthFullName[m.m] : monthFullEn[m.m];
+      return `
+        <div class="campaign-row" style="grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;">
+          <div class="campaign-name">
+            <span class="n">${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}</span>
+            <span class="meta">${fmt.int(m.rms)} ${L === 'pt' ? 'quartos no livro' : 'rooms booked'}</span>
+          </div>
+          <div class="campaign-budget">
+            ${fmt.moneyShort(m.rev)}
+            <span class="sub">${L === 'pt' ? 'receita confirmada' : 'confirmed revenue'}</span>
+          </div>
+          <div class="campaign-conv">
+            ${(m.occOTB * 100).toFixed(0)}%
+            <span class="sub">${L === 'pt' ? 'ocupação no livro' : 'on-the-books occ'}</span>
+          </div>
+          <div class="campaign-conv">
+            ${(m.occBgt * 100).toFixed(0)}%
+            <span class="sub ${budgetKlass}">${budgetGap !== null ? (budgetGap >= 0 ? '+' : '') + (budgetGap * 100).toFixed(0) + ' ' + (L === 'pt' ? 'pontos' : 'points') : '—'}</span>
+          </div>
+          <div class="campaign-rev">
+            ${yoyRms !== null ? fmt.pctSign(yoyRms, 0) : '—'}
+            <span class="sub ${yoyKlass}">${L === 'pt' ? 'vs. 2025' : 'vs. 2025'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  const tableHeader = `
+    <div class="campaign-row header" style="grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;">
+      <span>${L === 'pt' ? 'Mês de estadia' : 'Stay month'}</span>
+      <span>${L === 'pt' ? 'Receita confirmada' : 'Confirmed revenue'}</span>
+      <span>${L === 'pt' ? 'Ocupação no livro' : 'On-the-books occ'}</span>
+      <span>${L === 'pt' ? 'Orçamento' : 'Budget'}</span>
+      <span>${L === 'pt' ? 'vs. 2025' : 'vs. 2025'}</span>
+    </div>
+  `;
+
+  target.innerHTML = `
+    <article class="story rise d1">
+      <div class="story-eyebrow">
+        <span class="badge"><span class="dot"></span>${L === 'pt' ? 'Ano inteiro 2026' : 'Full year 2026'}</span>
+        <span class="sep">·</span>
+        <span class="meta">${L === 'pt' ? 'Snapshot, 25 Maio' : 'Snapshot, 25 May'} · ${fmt.int(fy.weeklyPickup)} ${L === 'pt' ? 'novas reservas esta semana' : 'new bookings this week'}</span>
+      </div>
+      <h1 class="story-headline">${headline}</h1>
+      <p class="story-body">${body}</p>
+      <div class="story-foot">
+        <div class="story-tag"><span>${L === 'pt' ? 'Receita confirmada' : 'Confirmed revenue'}</span><span class="v pos">${fmt.moneyShort(fy.revenue)}</span></div>
+        <div class="story-tag"><span>vs. 2025</span><span class="v pos">${fmt.pctSign(yoyRevPct, 0)}</span></div>
+        <div class="story-tag"><span>${L === 'pt' ? 'Ocupação confirmada' : 'Confirmed occupancy'}</span><span class="v">${(fy.occOTB * 100).toFixed(0)}%</span></div>
+        <div class="story-tag"><span>${L === 'pt' ? 'Orçamento' : 'Budget'}</span><span class="v">${(fy.occBudget * 100).toFixed(0)}%</span></div>
+      </div>
+    </article>
+
+    <section class="section rise d2">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo I' : 'Chapter I'}</div>
+          <h2>${L === 'pt' ? 'A fotografia do ' : 'The snapshot of the '}<em>${L === 'pt' ? 'ano' : 'year'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'O que está no livro hoje, comparado com o mesmo momento de 2025 e com o orçamento aprovado.' : 'What is on the books today, compared with the same moment of 2025 and with the approved budget.'}</p>
+        </div>
+      </div>
+      ${heroKPIs}
+    </section>
+
+    <section class="section rise d3">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo II' : 'Chapter II'}</div>
+          <h2>${L === 'pt' ? 'Mês a mês, ' : 'Month by month, '}<em>${L === 'pt' ? 'o que falta' : 'what remains'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'A leitura crítica: cada mês de estadia, a ocupação que já está no livro contra o orçamento, e como estamos face ao ano passado nesta altura.' : 'The critical read: each stay month, the occupancy already on the books versus budget, and how we compare to last year at this point.'}</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <div class="campaign-list">
+            ${tableHeader}
+            ${tableRows}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section rise d4">
+      <div class="section-head">
+        <div class="section-titles">
+          <div class="eyebrow">${L === 'pt' ? 'Capítulo III' : 'Chapter III'}</div>
+          <h2>${L === 'pt' ? 'O ritmo, ' : 'The pace, '}<em>${L === 'pt' ? 'semana a semana' : 'week by week'}</em></h2>
+          <p class="dek">${L === 'pt' ? 'O livro cresceu de €6,8M para €8,3M nas últimas cinco semanas, uma média de mais de seiscentos quartos reservados por semana.' : 'The book has grown from €6.8M to €8.3M over the past five weeks, at an average of more than six hundred rooms booked per week.'}</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body" style="min-height: 280px;">
+          <canvas id="chart-pace-weekly"></canvas>
+        </div>
+      </div>
+    </section>
+  `;
+
+  setTimeout(() => renderWeeklyPaceChart(), 60);
+}
+
+function renderWeeklyPaceChart() {
+  const ctx = document.getElementById('chart-pace-weekly');
+  if (!ctx) return;
+  if (charts.pace) charts.pace.destroy();
+  const labels = REAL_DATA.bookingPace.map(p => p.week);
+  const revs = REAL_DATA.bookingPace.map(p => p.rev);
+  const css = getComputedStyle(document.documentElement);
+  const isDark = document.body.dataset.theme === 'dark';
+  const primary = isDark ? css.getPropertyValue('--gold').trim() : css.getPropertyValue('--tierra').trim();
+
+  charts.pace = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: revs,
+        backgroundColor: primary,
+        borderRadius: 1,
+        barPercentage: 0.55,
+      }],
+    },
+    options: {
+      ...chartCommonOptions(),
+      plugins: {
+        ...chartCommonOptions().plugins,
+        tooltip: {
+          ...chartCommonOptions().plugins.tooltip,
+          callbacks: {
+            label: (ctx) => fmt.moneyShort(ctx.parsed.y),
+          },
+        },
+      },
+    },
+  });
+}
+
+function renderMonthViewOld() {
+  // legacy renderer (retained for reference, no longer called)
   const target = document.getElementById('view-month-content');
   if (!target) return;
   const s = buildMonthStory();
